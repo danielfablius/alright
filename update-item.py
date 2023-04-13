@@ -16,8 +16,8 @@ PARKIR = 0
 
 hournow = datetime.now().strftime("%H")
 if int(hournow) < 4:
-    startdate = date.today().strftime("%d/%m/%Y")
-    enddate = (date.today() - timedelta(1)).strftime('%d/%m/%Y')
+    startdate = (date.today() - timedelta(1)).strftime('%d/%m/%Y')
+    enddate = date.today().strftime("%d/%m/%Y")
     starttime = "09:00"
     endtime = "04:00"
 else:
