@@ -5,6 +5,7 @@ from datetime import date,datetime,timedelta
 import requests
 import pandas
 import json
+import sys
 
 
 MINUMAN = 0
@@ -162,14 +163,18 @@ for (item_name), (category), (item_sold), (item_void) in zip(json_data["Item Nam
        if "Ngeghibah" in str(item_name):
             PAKET_PROMO = PAKET_PROMO + (item_sold*6) - (item_void*6)
 TOTAL = MINUMAN + MAKANAN + BEER + OPEN_BILL + PAKET_PROMO
-TARGET = 300
+TARGET = int(sys.argv[1])
+print(TARGET)
 if TARGET < TOTAL:
     TARGET = TARGET + 50
 
 msg = f"*UPDATE ITEM*\n*TARGET*: {TARGET}\n\n*ITEM*\nMINUMAN: {MINUMAN}\nMAKANAN: {MAKANAN}\nBEER: {BEER}\nOPEN BILL: {OPEN_BILL}\nPAKET/PROMO: {PAKET_PROMO}\nPARKIR: {PARKIR}\n\nTOTAL: {TOTAL}\nMINUS: {TARGET-TOTAL}"
+print(msg)
 
 messenger = WhatsApp()
 messenger.find_by_username('KOORDINASI TARGET 1994')
 messenger.send_message(msg)
 
 sleep(30)
+messenger.browser.quit()
+
