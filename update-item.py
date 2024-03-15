@@ -38,6 +38,7 @@ def get_sales_by_item(branch_name):
     MAKANAN = 0
     BEER = 0
     OPEN_BILL = 0
+    MERCHANDISE = 0
     PAKET_PROMO = 0 
     PARKIR = 0
     #GET SALES BY ITEM
@@ -160,12 +161,14 @@ def get_sales_by_item(branch_name):
 
 
     for (item_name), (category), (item_sold), (item_void) in zip(json_data["Item Name"].values(),json_data["Category"].values(),json_data["Item Sold"].values(),json_data["Item Void"].values()):
-        if (category == "ESPRESSO BASED" or category == "TEA" or category == "MANUAL BREW" or category == "MOCKTAIL" or category == "POWDER BASED"):
+        if (category == "ESPRESSO BASED" or category == "TEA" or category == "MANUAL BREW" or category == "MOCKTAIL" or category == "POWDER BASED" or category == 'LARGE'):
             MINUMAN = MINUMAN + item_sold - item_void 
         elif category == "EATS AND BITES":
             MAKANAN = MAKANAN + item_sold - item_void 
         elif category == "BEER":
             BEER = BEER + item_sold - item_void 
+        elif category == 'Merchandise':
+            MERCHANDISE += item_sold - item_void
         elif category == "Parkir":
             PARKIR = PARKIR + item_sold - item_void 
         elif "Paket" in str(category):
