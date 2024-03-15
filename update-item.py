@@ -184,7 +184,22 @@ def get_sales_by_item(branch_name):
     if TARGET < TOTAL:
         TARGET = TARGET + 50
 
-    msg = f"*UPDATE ITEM {branch_name}*\n*TARGET*: {TARGET}\n\n*ITEM*\nMINUMAN: {MINUMAN}\nMAKANAN: {MAKANAN}\nBEER: {BEER}\nOPEN BILL: {OPEN_BILL}\nPAKET/PROMO: {PAKET_PROMO}\nPARKIR: {PARKIR}\n\nTOTAL: {TOTAL}\nMINUS: {TARGET-TOTAL}"
+
+    msg = f"*UPDATE ITEM {branch_name}*\n" + \
+          f"*TARGET*: {TARGET}\n" + \
+           "\n" + \
+           "*ITEM*\n" + \
+          f"MINUMAN: {MINUMAN}\n" + \
+          f"MAKANAN: {MAKANAN}\n" + \
+          f"BEER: {BEER}\n" + \
+          f"OPEN BILL: {OPEN_BILL}\n" + \
+          (f"MERCHANDISE: {MERCHANDISE}\n" if MERCHANDISE else '') + \
+          (f"PAKET/PROMO: {PAKET_PROMO}\n" if PAKET_PROMO else '') + \
+          f"PARKIR: {PARKIR}\n" + \
+           "\n" + \
+          f"TOTAL: {TOTAL}\n" + \
+          f"MINUS: {TARGET - TOTAL}"
+
     print(msg)
     
     messenger.find_by_username('KOORDINASI TARGET 1994')
