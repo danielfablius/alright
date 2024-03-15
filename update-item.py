@@ -31,7 +31,7 @@ else:
     endtime = "23:59"
 
 print(startdate, enddate, starttime, endtime)
-# messenger = WhatsApp() 
+messenger = WhatsApp() 
 
 def get_sales_by_item(branch_name):
     MINUMAN = 0
@@ -184,11 +184,12 @@ def get_sales_by_item(branch_name):
     msg = f"*UPDATE ITEM {branch_name}*\n*TARGET*: {TARGET}\n\n*ITEM*\nMINUMAN: {MINUMAN}\nMAKANAN: {MAKANAN}\nBEER: {BEER}\nOPEN BILL: {OPEN_BILL}\nPAKET/PROMO: {PAKET_PROMO}\nPARKIR: {PARKIR}\n\nTOTAL: {TOTAL}\nMINUS: {TARGET-TOTAL}"
     print(msg)
     
-#     messenger.find_by_username('KOORDINASI TARGET 1994')
-#     messenger.send_message(msg)
+    messenger.find_by_username('KOORDINASI TARGET 1994')
+    messenger.send_message(msg)
 
 get_sales_by_item('DAGO')
 get_sales_by_item('NARIPAN')
-# sleep(30)
-# messenger.browser.quit()
+
+sleep(30)
+messenger.browser.quit()
 
