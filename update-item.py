@@ -1,114 +1,135 @@
 # If you DO have the WhatsApp Desktop app installed
 from alright import WhatsApp
-from time import sleep
-from datetime import date,datetime,timedelta
-import requests
-import pandas
+from operator import itemgetter
+from collections import defaultdict
+import datetime
+import locale
 import json
+import pandas as pd
+import requests
 import sys
+import time
 
+
+locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
+
+cookies = {
+    'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
+    'cookiesession1': '582E227AX2XLTOJCDDGAQX84O1CA8C39',
+    'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
+}
 
 BRANCH_IDS = {
     'DAGO': 10210,
     'NARIPAN': 14376,
 }
 
-TARGETS = {
-    'DAGO': sys.argv[1],
-    'NARIPAN': sys.argv[2],
+DEFAULT_TARGETS = {
+    'DAGO': [400, 400, 400, 400, 400, 1000, 500],
+    'NARIPAN': [200, 200, 200, 200, 200, 500, 400],
 }
 
-hournow = datetime.now().strftime("%H")
-if int(hournow) < 4:
-    startdate = (date.today() - timedelta(1)).strftime('%d/%m/%Y')
-    enddate = date.today().strftime("%d/%m/%Y")
-    starttime = "09:00"
-    endtime = "04:00"
-else:
-    startdate = date.today().strftime("%d/%m/%Y")
-    enddate = startdate
-    starttime = "09:00"
-    endtime = "23:59"
+TARGETS = {
+    'DAGO': int(sys.argv[1]) if len(sys.argv) >= 2 else DEFAULT_TARGETS['DAGO'][datetime.today().weekday()],
+    'NARIPAN': int(sys.argv[2]) if len(sys.argv) >= 3 else DEFAULT_TARGETS['NARIPAN'][datetime.today().weekday()],
+}
 
-print(startdate, enddate, starttime, endtime)
-messenger = WhatsApp() 
+OPEN_HOURS = {
+    'DAGO': 10,
+    'NARIPAN': 8,
+}
 
-def get_sales_by_item(branch_name):
-    MINUMAN = 0
-    MAKANAN = 0
-    BEER = 0
-    OPEN_BILL = 0
-    MERCHANDISE = 0
-    PAKET_PROMO = 0 
-    PARKIR = 0
-    #GET SALES BY ITEM
+messenger = WhatsApp()
 
-    laporan_sales_by_item_cookies = {
-        'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
-        'cookiesession1': '582E227AX2XLTOJCDDGAQX84O1CA8C39',
-        'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%226cc9f323d838b0fb08b877caa0d437da%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681220365%3B%7D9de35c481dcfcac35d873096c53557970a219bda',
+
+def get_report_date_range():
+    now = datetime.datetime.now()
+    start_hour = datetime.datetime.today().replace(hour=8, minute=0, second=0, microsecond=0)
+
+    if now.hour < 3:
+        return (start_hour - datetime.timedelta(1)), (now-datetime.timedelta(1)).replace(hour=4, minute=0, second=0)
+    else:
+        return start_hour, now.replace(hour=23, minute=59, second=0)
+    
+
+def get_shifting_date():
+    now = datetime.datetime.now()
+
+    if now.hour < 3:
+        return now - datetime.timedelta(1)
+    else:
+        return now
+
+
+def get_start_and_end_date():
+    now = datetime.datetime.now()
+
+    if now.hour < 3:
+        return now - datetime.timedelta(1), now
+    elif now.hour >= 9:
+        return now, now
+
+
+def get_start_and_end_time():
+    now = datetime.datetime.now()
+
+    if now.hour < 3:
+        return '08:00', '04:00'
+    else:
+        return '08:00', '23:59'
+
+
+def get_laporan_sales_by_category(branch_id):
+    print(startdate, enddate)
+    print(starttime, endtime)
+    data = {
+        'radio-duration': 'all-day',
+        'time-left': '00',
+        'time-left': '00',
+        'time-right': '00',
+        'time-right': '00',
+        'branch': str(branch_id),
+        'arr_branch': str(branch_id),
+        'arr_staff': '',
+        'reportrange': f'{startdate} - {enddate}',
+        'duration': f'{starttime} - {endtime}',
+        'flagEachday': 'false',
+        'column': '[{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"void"}]',
+        'companyid': '8733',
+        'company_type': '0',
     }
 
-    laporan_sales_by_item_headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'en,en-US;q=0.9',
-        'Cache-Control': 'max-age=0',
-        'Connection': 'keep-alive',
-        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundarysiBE1ArGJV7KadH1',
-        # Requests sorts cookies= alphabetically
-        # 'Cookie': 'csrf_cookie_mpos=5b0c7b868ca031f555e490e9b29fd8de; cookiesession1=582E227AX2XLTOJCDDGAQX84O1CA8C39; ci_session=a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%226cc9f323d838b0fb08b877caa0d437da%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681220365%3B%7D9de35c481dcfcac35d873096c53557970a219bda',
-        'Origin': 'https://backoffice.dretail.id',
-        'Referer': 'https://backoffice.dretail.id/admin/c_report_mt_salesbyitem',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-        'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
+    response = requests.post(
+        'https://backoffice.dretail.id/mpos-server/index.php/C_report_mt_salesbycategory/exportXls',
+        cookies=cookies,
+        data=data,
+    )
+
+    with open(f'laporan_sales_by_category_{branch_id}.xlsx', 'wb') as f:
+        f.write(response.content)
+    
+    return pd.read_excel(f'laporan_sales_by_category_{branch_id}.xlsx', skiprows=7)
+
+
+def get_report_salesrealtime_detail(reffnumber):
+    data = {
+        'reffnumber': reffnumber,
     }
 
-    laporan_sales_by_item_data = '------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="csrf_token_mpos"\r\n\r\n5b0c7b868ca031f555e490e9b29fd8de\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="radio-duration"\r\n\r\nall-day\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="time-left"\r\n\r\n00\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="time-left"\r\n\r\n00\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="time-right"\r\n\r\n00\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="time-right"\r\n\r\n00\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="branch"\r\n\r\n%d\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="arr_branch"\r\n\r\n%d\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="arr_staff"\r\n\r\n\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="reportrange"\r\n\r\n%s - %s\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="duration"\r\n\r\n%s - %s\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="flagEachday"\r\n\r\nfalse\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="column"\r\n\r\n[{"name":"column[]","value":"item_name"},{"name":"column[]","value":"modifier"},{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"grosssales"},{"name":"column[]","value":"void"},{"name":"column[]","value":"voidamount"},{"name":"column[]","value":"discount"},{"name":"column[]","value":"discount_bill"},{"name":"column[]","value":"total"},{"name":"column[]","value":"service"},{"name":"column[]","value":"tax"},{"name":"column[]","value":"grandtotal"}]\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="companyid"\r\n\r\n8733\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1\r\nContent-Disposition: form-data; name="company_type"\r\n\r\n0\r\n------WebKitFormBoundarysiBE1ArGJV7KadH1--\r\n' % (BRANCH_IDS[branch_name], BRANCH_IDS[branch_name], startdate, enddate, starttime, endtime)
+    response = requests.post(
+        'https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/details',
+        cookies=cookies,
+        data=data,
+    )
 
-    response = requests.post('https://backoffice.dretail.id/mpos-server/index.php/C_report_mt_salesitem/exportXls', cookies=laporan_sales_by_item_cookies, headers=laporan_sales_by_item_headers, data=laporan_sales_by_item_data)
-
-    open('laporan_sales_by_item.xlsx', 'wb').write(response.content)
-    excel = pandas.read_excel('laporan_sales_by_item.xlsx',skiprows=7)
-    data = excel.to_json()
-    json_data = json.loads(data)
+    opbill_data = json.loads(response.content)
+    return sum(map(lambda i: i['qty'] - i['voidQty'], filter(lambda x: x['catName'] != 'Parkir', opbill_data['txnproductitem']['detail'])))
 
 
-    ### GET OPEN BILL ###
-    cookies = {
-        'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
-        'cookiesession1': '582E227AX2XLTOJCDDGAQX84O1CA8C39',
-        'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
-    }
-
-    headers = {
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Accept-Language': 'en,en-US;q=0.9',
-        'Connection': 'keep-alive',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        # Requests sorts cookies= alphabetically
-        # 'Cookie': 'csrf_cookie_mpos=5b0c7b868ca031f555e490e9b29fd8de; cookiesession1=582E227AX2XLTOJCDDGAQX84O1CA8C39; ci_session=a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
-        'Origin': 'https://backoffice.dretail.id',
-        'Referer': 'https://backoffice.dretail.id/admin/c_report_salesrealtime',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-        'X-Requested-With': 'XMLHttpRequest',
-        'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-    }
-
+def get_open_bill(branch_id):
     data = {
         'draw': '1',
-        'branch': BRANCH_IDS[branch_name],
+        'branch': str(branch_id),
         'status': 'all status',
         'date': 'today',
         'columns[0][name]': '',
@@ -116,98 +137,111 @@ def get_sales_by_item(branch_name):
         'order[0][dir]': '',
     }
 
-    response = requests.post('https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/getData', cookies=cookies, headers=headers, data=data)
+    response = requests.post(
+        'https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/getData',
+        cookies=cookies,
+        data=data,
+    )
 
-    data = response.content
-    reff_json_data = json.loads(data)
-
-
-    headers = {
-        'Accept': '*/*',
-        'Accept-Language': 'en,en-US;q=0.9',
-        'Connection': 'keep-alive',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        # 'Cookie': 'csrf_cookie_mpos=5b0c7b868ca031f555e490e9b29fd8de; cookiesession1=582E227AX2XLTOJCDDGAQX84O1CA8C39; ci_session=a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%220cb2a0943ed7a03715ed2f69c4c33e9d%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681232034%3B%7D34e2a6c0802f02b1e3a1662b569ede76e0af1bb1',
-        'Origin': 'https://backoffice.dretail.id',
-        'Referer': 'https://backoffice.dretail.id/admin/c_report_salesrealtime',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-        'X-Requested-With': 'XMLHttpRequest',
-        'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-    }
-    for v in reff_json_data["data"]:
-        if v["reff_number"] != "":
-            reff_num = v["reff_number"]
-            data = {
-                'reffnumber': reff_num,
-                'csrf_token_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
-            }
-
-            response = requests.post(
-                'https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/details',
-                cookies=cookies,
-                headers=headers,
-                data=data,
-            )
-
-            data = response.content
-            opbill_data = json.loads(data)
-            qty = opbill_data["txnproductitem"]["bill"]["qty"]
-            OPEN_BILL = OPEN_BILL + qty
+    salesrealtime_data = json.loads(response.content)
+    reffnumbers = filter(lambda x: x != '', map(itemgetter('reff_number'), salesrealtime_data['data']))
+    open_bills = map(get_report_salesrealtime_detail, reffnumbers)
+    return sum(open_bills)
 
 
-    for (item_name), (category), (item_sold), (item_void) in zip(json_data["Item Name"].values(),json_data["Category"].values(),json_data["Item Sold"].values(),json_data["Item Void"].values()):
-        if (category == "ESPRESSO BASED" or category == "TEA" or category == "MANUAL BREW" or category == "MOCKTAIL" or category == "POWDER BASED" or category == 'LARGE'):
-            MINUMAN = MINUMAN + item_sold - item_void 
-        elif category == "EATS AND BITES":
-            MAKANAN = MAKANAN + item_sold - item_void 
-        elif category == "BEER":
-            BEER = BEER + item_sold - item_void 
-        elif category == 'Merchandise':
-            MERCHANDISE += item_sold - item_void
-        elif category == "Parkir":
-            PARKIR = PARKIR + item_sold - item_void 
-        elif "Paket" in str(category):
-            if "Jomblo" in str(item_name):
-                PAKET_PROMO = PAKET_PROMO + (item_sold*1) - (item_void*1)
-            if "Romantis" in str(item_name):
-                PAKET_PROMO = PAKET_PROMO + (item_sold*3) - (item_void*3)
-            if "Ngeghibah" in str(item_name):
-                PAKET_PROMO = PAKET_PROMO + (item_sold*6) - (item_void*6)
-    TOTAL = MINUMAN + MAKANAN + BEER + OPEN_BILL + PAKET_PROMO
-    TARGET = int(TARGETS[branch_name])
-    print(TARGET)
-    if TARGET < TOTAL:
-        TARGET = TARGET + 50
+def get_target(branch_name, TOTAL):
+    TARGET = TARGETS[branch_name]
+    
+    if TOTAL > TARGET:
+        TARGET = 50 * ((TOTAL // 50) + 1)
+    
+    return TARGET
 
 
-    msg = f"*UPDATE ITEM {branch_name}*\n" + \
-          f"*TARGET*: {TARGET}\n" + \
-           "\n" + \
-           "*ITEM*\n" + \
-          f"MINUMAN: {MINUMAN}\n" + \
-          f"MAKANAN: {MAKANAN}\n" + \
-          f"BEER: {BEER}\n" + \
-          f"OPEN BILL: {OPEN_BILL}\n" + \
-          (f"MERCHANDISE: {MERCHANDISE}\n" if MERCHANDISE else '') + \
-          (f"PAKET/PROMO: {PAKET_PROMO}\n" if PAKET_PROMO else '') + \
-          f"PARKIR: {PARKIR}\n" + \
-           "\n" + \
-          f"TOTAL: {TOTAL}\n" + \
-          f"MINUS: {TARGET - TOTAL}"
+def get_sales_by_category(branch_name):
+    items = defaultdict(int)
+    df_laporan_sales = get_laporan_sales_by_category(BRANCH_IDS[branch_name])
+
+    for idx, row in df_laporan_sales.iterrows():
+        items[row['Category']] += row['Item Sold'] - row['Item Void']
+    
+    MINUMAN = items['ESPRESSO BASED'] + items['POWDER BASED'] + items['MOCKTAIL'] + items['MANUAL BREW'] + items['TEA'] + items['LARGE']
+    MAKANAN = items['EATS AND BITES']
+    BEER = items['BEER']
+    ROKOK = items['ROKOK']
+    MERCHANDISE = items['MERCHANDISE']
+    PAKET_BUKBER = items['PAKET BUKBER']
+    PAKET_PROMO = items['PAKET PROMO']
+    NOBAR = items['Event']
+    PARKIR = items['Parkir']
+    TOTAL = MINUMAN + MAKANAN + BEER + ROKOK + MERCHANDISE + NOBAR
+
+    OPEN_BILL = get_open_bill(BRANCH_IDS[branch_name])
+    TOTAL += OPEN_BILL
+    TARGET = get_target(branch_name, TOTAL)
+
+    msg = \
+        f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
+        f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+        f'*TARGET*: {TARGET}\n' + \
+        '\n' + \
+        '*ITEM*\n' + \
+        f'MINUMAN: {MINUMAN}\n' + \
+        f'MAKANAN: {MAKANAN}\n' + \
+        (f'BEER: {BEER}\n' if BEER else '') + \
+        (f'ROKOK: {ROKOK}\n' if ROKOK else '') + \
+        (f'MERCHANDISE: {MERCHANDISE}\n' if MERCHANDISE else '') + \
+        f'OPEN BILL: {OPEN_BILL}\n' + \
+        (f'PAKET/PROMO: {PAKET_PROMO}\n' if PAKET_PROMO else '') + \
+        (f'NOBAR: {NOBAR}\n' if NOBAR else '') + \
+        (f'PAKET BUKBER: {PAKET_BUKBER}\n' if PAKET_BUKBER else '') + \
+        f'PARKIR: {PARKIR}\n' + \
+        '\n' + \
+        f'TOTAL: {TOTAL}\n' + \
+        f'MINUS: {TARGET - TOTAL}\n' + \
+        '\n' + \
+        f'TARGET ITEM: {int(PARKIR * 2.3 * 1.5)}'
 
     print(msg)
     
-    messenger.find_by_username('KOORDINASI TARGET 1994')
-    messenger.send_message(msg)
+    messenger.send_direct_message('Koordinasi Target 1994', msg)
 
-get_sales_by_item('DAGO')
-get_sales_by_item('NARIPAN')
 
-sleep(30)
-messenger.browser.quit()
+def get_seconds_to_sleep():
+    # return seconds to sleep until the next minutes of INTERVAL_IN_MINUTE
+    interval_in_minute = max(2, int(sys.argv[3]) if len(sys.argv) >= 4 else 15)
+    now = datetime.datetime.now()
+    minutes_to_sleep = interval_in_minute - now.minute % interval_in_minute
+    return minutes_to_sleep * 60 - now.second
 
+
+while True:
+    startdate, enddate = get_start_and_end_date()
+    starttime, endtime = get_start_and_end_time()
+
+    startdate = startdate.strftime('%d/%m/%Y')
+    enddate = enddate.strftime('%d/%m/%Y')
+
+    # time.sleep(get_seconds_to_sleep())
+
+    now = datetime.datetime.now()
+    if now.hour >= 2 and now.hour < 8:
+        # sys.exit()
+        pass
+
+    print(f'{startdate} {starttime} - {enddate} {endtime}')
+
+    # messenger = WhatsApp()
+
+    try:
+        get_sales_by_category('DAGO')
+    except:
+        pass
+
+    try:
+        get_sales_by_category('NARIPAN')
+    except:
+        pass
+     
+    # messenger.close_when_message_successfully_sent()
+    time.sleep(get_seconds_to_sleep())
