@@ -220,25 +220,19 @@ while True:
     startdate = startdate.strftime('%d/%m/%Y')
     enddate = enddate.strftime('%d/%m/%Y')
 
-    # time.sleep(get_seconds_to_sleep())
-
-    now = datetime.datetime.now()
-    if CLOSING_HOUR <= now.hour < OPENING_HOUR:
-        break
-
     print(f'{startdate} {starttime} - {enddate} {endtime}')
-
-    # messenger = WhatsApp()
 
     try:
         get_sales_by_category('DAGO')
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
     try:
         get_sales_by_category('NARIPAN')
-    except:
-        pass
-     
-    # messenger.close_when_message_successfully_sent()
+    except Exception as e:
+        print(e)
+    
+    if CLOSING_HOUR <= datetime.datetime.now().hour < OPENING_HOUR:
+        break
+    
     time.sleep(get_seconds_to_sleep())
