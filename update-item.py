@@ -13,6 +13,9 @@ import time
 
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
+OPENING_HOUR = 8
+CLOSING_HOUR = 3
+
 cookies = {
     'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
     'cookiesession1': '582E227AX2XLTOJCDDGAQX84O1CA8C39',
@@ -34,11 +37,6 @@ TARGETS = {
     'NARIPAN': int(sys.argv[2]) if len(sys.argv) >= 3 else DEFAULT_TARGETS['NARIPAN'][datetime.today().weekday()],
 }
 
-OPEN_HOURS = {
-    'DAGO': 10,
-    'NARIPAN': 8,
-}
-
 messenger = WhatsApp()
 
 
@@ -55,7 +53,7 @@ def get_report_date_range():
 def get_shifting_date():
     now = datetime.datetime.now()
 
-    if now.hour < 3:
+    if now.hour < CLOSING_HOUR:
         return now - datetime.timedelta(1)
     else:
         return now
@@ -64,16 +62,16 @@ def get_shifting_date():
 def get_start_and_end_date():
     now = datetime.datetime.now()
 
-    if now.hour < 3:
+    if now.hour < CLOSING_HOUR:
         return now - datetime.timedelta(1), now
-    elif now.hour >= 9:
+    else:
         return now, now
 
 
 def get_start_and_end_time():
     now = datetime.datetime.now()
 
-    if now.hour < 3:
+    if now.hour < CLOSING_HOUR:
         return '08:00', '04:00'
     else:
         return '08:00', '23:59'
@@ -225,9 +223,8 @@ while True:
     # time.sleep(get_seconds_to_sleep())
 
     now = datetime.datetime.now()
-    if now.hour >= 2 and now.hour < 8:
-        # sys.exit()
-        pass
+    if CLOSING_HOUR <= now.hour < OPENING_HOUR:
+        break
 
     print(f'{startdate} {starttime} - {enddate} {endtime}')
 
