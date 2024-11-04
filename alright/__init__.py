@@ -158,7 +158,7 @@ class WhatsApp(object):
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    "/html/body/div[1]/div/div/div[4]/div/div[1]/div/div/div[2]/div/div[1]",
+                    '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]',
                 )
             )
         )
