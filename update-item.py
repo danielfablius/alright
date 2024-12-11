@@ -2,20 +2,24 @@
 from alright import WhatsApp
 from operator import itemgetter
 from collections import defaultdict
+import argparse
 import datetime
 import locale
 import json
 import pandas as pd
 import requests
-import sys
 import time
 
+
+parser = argparse.ArgumentParser('1994 Auto Update Item')
+parser.add_argument('targets', nargs=2, type=int, help='Target items for all branches, each for DAGO and NARIPAN, respectively.')
+parser.add_argument('interval', nargs='?', type=int, help='The interval in which the update should occur.', default=0)
+parser.add_argument('-s', '--skip-initial', action='store_true', help='Whether the update should trigger immediately or wait for the next interval.')
+args = parser.parse_args()
 
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
 WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
-OPENING_HOUR = 8
-CLOSING_HOUR = 3
 
 cookies = {
     'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
@@ -23,19 +27,24 @@ cookies = {
     'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
 }
 
+BRANCHES = [
+    'DAGO',
+    'NARIPAN',
+]
+
 BRANCH_IDS = {
     'DAGO': 10210,
     'NARIPAN': 14376,
 }
 
-DEFAULT_TARGETS = {
-    'DAGO': [400, 400, 400, 400, 400, 1000, 500],
-    'NARIPAN': [200, 200, 200, 200, 200, 500, 400],
+OPENING_HOURS = {
+    'DAGO': 10,
+    'NARIPAN': 8,
 }
 
 TARGETS = {
-    'DAGO': int(sys.argv[1]) if len(sys.argv) >= 2 else DEFAULT_TARGETS['DAGO'][datetime.today().weekday()],
-    'NARIPAN': int(sys.argv[2]) if len(sys.argv) >= 3 else DEFAULT_TARGETS['NARIPAN'][datetime.today().weekday()],
+    'DAGO': args.targets[0],
+    'NARIPAN': args.targets[1],
 }
 
 messenger = WhatsApp()
@@ -51,34 +60,44 @@ def get_report_date_range():
         return start_hour, now.replace(hour=23, minute=59, second=0)
     
 
-def get_shifting_date():
+def get_shifting_date(branch_name):
+    # Shifting Date will be set to yesterday when the current hour is between
+    # midnight and Closing Hour (1 hour before opening hour of each branch).
     now = datetime.datetime.now()
 
-    if now.hour < CLOSING_HOUR:
+    if now.hour < OPENING_HOURS[branch_name] - 1:
         return now - datetime.timedelta(1)
     else:
         return now
 
 
-def get_start_and_end_date():
-    now = datetime.datetime.now()
-
-    if now.hour < CLOSING_HOUR:
-        return now - datetime.timedelta(1), now
-    else:
-        return now, now
+def get_start_and_end_date(branch_name):
+    # Start Date will be set to current shifting date,
+    # while the End Date will be the next day.
+    shifting_date = get_shifting_date(branch_name)
+    return shifting_date, shifting_date + datetime.timedelta(1)
 
 
-def get_start_and_end_time():
-    now = datetime.datetime.now()
+def get_start_and_end_time(branch_name: str, start_date: datetime.datetime, end_date: datetime.datetime):
+    # Start Time will be set to Opening Hour of the shifting date,
+    # while the End Time will always be set to an hour before Opening Hour of end_date.
+    start_time = start_date.replace(hour=OPENING_HOURS[branch_name], minute=0, second=0).strftime('%H:%M')
+    end_time = end_date.replace(hour=OPENING_HOURS[branch_name] - 1, minute=0, second=0).strftime('%H:%M')
+    return start_time, end_time
 
-    if now.hour < CLOSING_HOUR:
-        return '08:00', '04:00'
-    else:
-        return '08:00', '23:59'
 
+def get_laporan_sales_by_category(branch_name):
+    branch_id = BRANCH_IDS[branch_name]
 
-def get_laporan_sales_by_category(branch_id):
+    startdate, enddate = get_start_and_end_date(branch_name)
+    starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
+
+    startdate = startdate.strftime('%d/%m/%Y')
+    enddate = enddate.strftime('%d/%m/%Y')
+
+    # The interval in which the sales report will be retrieved
+    print(f'{startdate} {starttime} - {enddate} {endtime}')
+
     data = {
         'radio-duration': 'all-day',
         'time-left': '00',
@@ -178,6 +197,7 @@ def print_items(items):
     PAKET_BUKBER = items['PAKET BUKBER']
     PAKET_PROMO = items['PAKET PROMO']
     EVENT = items['Event']
+    OPEN_BILL = items.get('OPEN_BILL')
     PARKIR = items['Parkir']
     TOTAL = MINUMAN + MAKANAN + BEER
 
@@ -189,13 +209,14 @@ def print_items(items):
         (f'PAKET/PROMO: {PAKET_PROMO}\n' if PAKET_PROMO else '') + \
         (f'EVENT: {EVENT}\n' if EVENT else '') + \
         (f'PAKET BUKBER: {PAKET_BUKBER}\n' if PAKET_BUKBER else '') + \
+        (f'OPEN BILL: {OPEN_BILL}\n' if OPEN_BILL else '') + \
         (f'PARKIR: {PARKIR}\n' if PARKIR else '') + \
         f'_*TOTAL: {TOTAL}*_\n'
 
 
-def get_sales_by_category(branch_name):
+def get_sales_by_category(branch_name, final=False):
     items = defaultdict(int)
-    df_laporan_sales = get_laporan_sales_by_category(BRANCH_IDS[branch_name])
+    df_laporan_sales = get_laporan_sales_by_category(branch_name)
 
     for _, row in df_laporan_sales.iterrows():
         items[row['Category']] += row['Item Sold'] - row['Item Void']
@@ -209,53 +230,75 @@ def get_sales_by_category(branch_name):
 
     TARGET = get_target(branch_name, GRAND_TOTAL)
 
-    msg = \
-        f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-        f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
-        f'*TARGET*: {TARGET}\n' + \
-        '\n' + \
-        '*ITEM*\n' + \
-        ITEMS_PRINTS + \
-        '\n' + \
-        '*OPEN BILL*\n' + \
-        OB_PRINTS + \
-        '\n' + \
-        f'*GRAND TOTAL: {GRAND_TOTAL}*\n' + \
-        f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
+    if final:
+        # Regenerate Items Prints with Open Bill
+        items['OPEN_BILL'] = TOTAL_OB
+        TOTAL_ITEMS, ITEMS_PRINTS = print_items(items)
+
+        msg = \
+            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
+            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
+            f'*TARGET*: {TARGET}\n' + \
+            '\n' + \
+            '*ITEM*\n' + \
+            '\n'.join(ITEMS_PRINTS.splitlines()[:-1]) + \
+            '\n' + \
+            '\n' + \
+            f'*TOTAL: {GRAND_TOTAL}*\n' + \
+            f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
+    else:
+        msg = \
+            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
+            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*TARGET*: {TARGET}\n' + \
+            '\n' + \
+            '*ITEM*\n' + \
+            ITEMS_PRINTS + \
+            '\n' + \
+            '*OPEN BILL*\n' + \
+            OB_PRINTS + \
+            '\n' + \
+            f'*GRAND TOTAL: {GRAND_TOTAL}*\n' + \
+            f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
 
     print(msg)
 
     messenger.send_direct_message(WHATSAPP_GROUP_NAME, msg)
 
 
+def get_dynamic_interval():
+    with open('interval_schema', 'r') as file:
+        interval_schema = [int(line.strip()) for line in file]
+        return interval_schema[a]
+
+
 def get_seconds_to_sleep():
     # return seconds to sleep until the next minutes of INTERVAL_IN_MINUTE
-    interval_in_minute = max(2, int(sys.argv[3]) if len(sys.argv) >= 4 else 15)
+    interval_in_minute = max(2, args.interval) if args.interval > 0 else get_dynamic_interval()
     now = datetime.datetime.now()
     minutes_to_sleep = interval_in_minute - now.minute % interval_in_minute
     return minutes_to_sleep * 60 - now.second
 
 
+if args.skip_initial:
+    time.sleep(get_seconds_to_sleep())
+
 while True:
-    startdate, enddate = get_start_and_end_date()
-    starttime, endtime = get_start_and_end_time()
-
-    startdate = startdate.strftime('%d/%m/%Y')
-    enddate = enddate.strftime('%d/%m/%Y')
-
-    print(f'{startdate} {starttime} - {enddate} {endtime}')
-
-    try:
-        get_sales_by_category('DAGO')
-    except Exception as e:
-        print(e)
-
-    try:
-        get_sales_by_category('NARIPAN')
-    except Exception as e:
-        print(e)
+    now = datetime.datetime.now()
     
-    if CLOSING_HOUR <= datetime.datetime.now().hour < OPENING_HOUR:
+    if CLOSING_HOUR <= now.hour < min(OPENING_HOURS.values()):
+        for branch in BRANCHES:
+            try:
+                get_sales_by_category(branch, final=True)
+            except Exception as e:
+                print(e)
         break
+
+    for branch in BRANCHES:
+        if not (CLOSING_HOUR <= now.hour < OPENING_HOURS[branch]):
+            try:
+                get_sales_by_category(branch)
+            except Exception as e:
+                print(e)
     
     time.sleep(get_seconds_to_sleep())
