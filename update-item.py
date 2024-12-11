@@ -2,6 +2,7 @@
 from alright import WhatsApp
 from operator import itemgetter
 from collections import defaultdict
+import argparse
 import datetime
 import locale
 import json
@@ -10,6 +11,12 @@ import requests
 import sys
 import time
 
+
+parser = argparse.ArgumentParser('1994 Auto Update Item')
+parser.add_argument('targets', nargs=2, type=int, help='Target items for all branches, each for DAGO and NARIPAN, respectively.')
+parser.add_argument('interval', nargs='?', type=int, help='The interval in which the update should occur.', default=0)
+parser.add_argument('-s', '--skip-initial', action='store_true', help='Whether the update should trigger immediately or wait for the next interval.')
+args = parser.parse_args()
 
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
@@ -34,8 +41,8 @@ DEFAULT_TARGETS = {
 }
 
 TARGETS = {
-    'DAGO': int(sys.argv[1]) if len(sys.argv) >= 2 else DEFAULT_TARGETS['DAGO'][datetime.today().weekday()],
-    'NARIPAN': int(sys.argv[2]) if len(sys.argv) >= 3 else DEFAULT_TARGETS['NARIPAN'][datetime.today().weekday()],
+    'DAGO': args.targets[0],
+    'NARIPAN': args.targets[1],
 }
 
 messenger = WhatsApp()
@@ -230,11 +237,14 @@ def get_sales_by_category(branch_name):
 
 def get_seconds_to_sleep():
     # return seconds to sleep until the next minutes of INTERVAL_IN_MINUTE
-    interval_in_minute = max(2, int(sys.argv[3]) if len(sys.argv) >= 4 else 15)
+    interval_in_minute = max(2, args.interval)
     now = datetime.datetime.now()
     minutes_to_sleep = interval_in_minute - now.minute % interval_in_minute
     return minutes_to_sleep * 60 - now.second
 
+
+if args.skip_initial:
+    time.sleep(get_seconds_to_sleep())
 
 while True:
     startdate, enddate = get_start_and_end_date()
