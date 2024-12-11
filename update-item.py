@@ -198,6 +198,7 @@ def print_items(items):
     PAKET_BUKBER = items['PAKET BUKBER']
     PAKET_PROMO = items['PAKET PROMO']
     EVENT = items['Event']
+    OPEN_BILL = items.get('OPEN_BILL')
     PARKIR = items['Parkir']
     TOTAL = MINUMAN + MAKANAN + BEER
 
@@ -209,11 +210,12 @@ def print_items(items):
         (f'PAKET/PROMO: {PAKET_PROMO}\n' if PAKET_PROMO else '') + \
         (f'EVENT: {EVENT}\n' if EVENT else '') + \
         (f'PAKET BUKBER: {PAKET_BUKBER}\n' if PAKET_BUKBER else '') + \
+        (f'OPEN BILL: {OPEN_BILL}\n' if OPEN_BILL else '') + \
         (f'PARKIR: {PARKIR}\n' if PARKIR else '') + \
         f'_*TOTAL: {TOTAL}*_\n'
 
 
-def get_sales_by_category(branch_name):
+def get_sales_by_category(branch_name, final=False):
     items = defaultdict(int)
     df_laporan_sales = get_laporan_sales_by_category(branch_name)
 
@@ -229,19 +231,36 @@ def get_sales_by_category(branch_name):
 
     TARGET = get_target(branch_name, GRAND_TOTAL)
 
-    msg = \
-        f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-        f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
-        f'*TARGET*: {TARGET}\n' + \
-        '\n' + \
-        '*ITEM*\n' + \
-        ITEMS_PRINTS + \
-        '\n' + \
-        '*OPEN BILL*\n' + \
-        OB_PRINTS + \
-        '\n' + \
-        f'*GRAND TOTAL: {GRAND_TOTAL}*\n' + \
-        f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
+    if final:
+        # Regenerate Items Prints with Open Bill
+        items['OPEN_BILL'] = TOTAL_OB
+        TOTAL_ITEMS, ITEMS_PRINTS = print_items(items)
+
+        msg = \
+            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
+            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*TARGET*: {TARGET}\n' + \
+            '\n' + \
+            '*ITEM*\n' + \
+            '\n'.join(ITEMS_PRINTS.splitlines()[:-1]) + \
+            '\n' + \
+            '\n' + \
+            f'*TOTAL: {GRAND_TOTAL}*\n' + \
+            f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
+    else:
+        msg = \
+            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
+            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*TARGET*: {TARGET}\n' + \
+            '\n' + \
+            '*ITEM*\n' + \
+            ITEMS_PRINTS + \
+            '\n' + \
+            '*OPEN BILL*\n' + \
+            OB_PRINTS + \
+            '\n' + \
+            f'*GRAND TOTAL: {GRAND_TOTAL}*\n' + \
+            f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
 
     print(msg)
 
@@ -263,6 +282,11 @@ while True:
     now = datetime.datetime.now()
     
     if CLOSING_HOUR <= now.hour < min(OPENING_HOURS.values()):
+        for branch in BRANCHES:
+            try:
+                get_sales_by_category(branch, final=True)
+            except Exception as e:
+                print(e)
         break
 
     for branch in BRANCHES:
