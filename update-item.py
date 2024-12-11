@@ -8,7 +8,6 @@ import locale
 import json
 import pandas as pd
 import requests
-import sys
 import time
 
 
@@ -21,7 +20,6 @@ args = parser.parse_args()
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
 WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
-OPENING_HOUR = 8
 CLOSING_HOUR = 3
 
 cookies = {
@@ -30,9 +28,19 @@ cookies = {
     'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
 }
 
+BRANCHES = [
+    'DAGO',
+    'NARIPAN',
+]
+
 BRANCH_IDS = {
     'DAGO': 10210,
     'NARIPAN': 14376,
+}
+
+OPENING_HOURS = {
+    'DAGO': 10,
+    'NARIPAN': 8,
 }
 
 TARGETS = {
@@ -54,6 +62,8 @@ def get_report_date_range():
     
 
 def get_shifting_date():
+    # Shifting Date will be set to yesterday when the current hour is between
+    # midnight and Closing Hour.
     now = datetime.datetime.now()
 
     if now.hour < CLOSING_HOUR:
@@ -63,24 +73,32 @@ def get_shifting_date():
 
 
 def get_start_and_end_date():
-    now = datetime.datetime.now()
-
-    if now.hour < CLOSING_HOUR:
-        return now - datetime.timedelta(1), now
-    else:
-        return now, now
+    # Start Date will be set to current shifting date,
+    # while the End Date will be the next day.
+    shifting_date = get_shifting_date()
+    return shifting_date, shifting_date + datetime.timedelta(1)
 
 
-def get_start_and_end_time():
-    now = datetime.datetime.now()
+def get_start_and_end_time(branch_name: str, start_date: datetime.datetime, end_date: datetime.datetime):
+    # Start Time will be set to Opening Hour of the shifting date,
+    # while the End Time will always be set to an hour before Opening Hour of end_date.
+    start_time = start_date.replace(hour=OPENING_HOURS[branch_name], minute=0, second=0).strftime('%H:%M')
+    end_time = end_date.replace(hour=OPENING_HOURS[branch_name] - 1, minute=0, second=0).strftime('%H:%M')
+    return start_time, end_time
 
-    if now.hour < CLOSING_HOUR:
-        return '08:00', '04:00'
-    else:
-        return '08:00', '23:59'
 
+def get_laporan_sales_by_category(branch_name):
+    branch_id = BRANCH_IDS[branch_name]
 
-def get_laporan_sales_by_category(branch_id):
+    startdate, enddate = get_start_and_end_date()
+    starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
+
+    startdate = startdate.strftime('%d/%m/%Y')
+    enddate = enddate.strftime('%d/%m/%Y')
+
+    # The interval in which the sales report will be retrieved
+    print(f'{startdate} {starttime} - {enddate} {endtime}')
+
     data = {
         'radio-duration': 'all-day',
         'time-left': '00',
@@ -197,7 +215,7 @@ def print_items(items):
 
 def get_sales_by_category(branch_name):
     items = defaultdict(int)
-    df_laporan_sales = get_laporan_sales_by_category(BRANCH_IDS[branch_name])
+    df_laporan_sales = get_laporan_sales_by_category(branch_name)
 
     for _, row in df_laporan_sales.iterrows():
         items[row['Category']] += row['Item Sold'] - row['Item Void']
@@ -242,25 +260,16 @@ if args.skip_initial:
     time.sleep(get_seconds_to_sleep())
 
 while True:
-    startdate, enddate = get_start_and_end_date()
-    starttime, endtime = get_start_and_end_time()
-
-    startdate = startdate.strftime('%d/%m/%Y')
-    enddate = enddate.strftime('%d/%m/%Y')
-
-    print(f'{startdate} {starttime} - {enddate} {endtime}')
-
-    try:
-        get_sales_by_category('DAGO')
-    except Exception as e:
-        print(e)
-
-    try:
-        get_sales_by_category('NARIPAN')
-    except Exception as e:
-        print(e)
+    now = datetime.datetime.now()
     
-    if CLOSING_HOUR <= datetime.datetime.now().hour < OPENING_HOUR:
+    if CLOSING_HOUR <= now.hour < min(OPENING_HOURS.values()):
         break
+
+    for branch in BRANCHES:
+        if not (CLOSING_HOUR <= now.hour < OPENING_HOURS[branch]):
+            try:
+                get_sales_by_category(branch)
+            except Exception as e:
+                print(e)
     
     time.sleep(get_seconds_to_sleep())
