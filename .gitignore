@@ -135,3 +135,6 @@ dmypy.json
 
 # open bill data
 opbill*
+
+# interval schema
+interval_schema

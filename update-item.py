@@ -267,9 +267,15 @@ def get_sales_by_category(branch_name, final=False):
     messenger.send_direct_message(WHATSAPP_GROUP_NAME, msg)
 
 
+def get_dynamic_interval():
+    with open('interval_schema', 'r') as file:
+        interval_schema = [int(line.strip()) for line in file]
+        return interval_schema[a]
+
+
 def get_seconds_to_sleep():
     # return seconds to sleep until the next minutes of INTERVAL_IN_MINUTE
-    interval_in_minute = max(2, args.interval)
+    interval_in_minute = max(2, args.interval) if args.interval > 0 else get_dynamic_interval()
     now = datetime.datetime.now()
     minutes_to_sleep = interval_in_minute - now.minute % interval_in_minute
     return minutes_to_sleep * 60 - now.second
