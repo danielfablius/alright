@@ -20,7 +20,6 @@ args = parser.parse_args()
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
 WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
-CLOSING_HOUR = 3
 
 cookies = {
     'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
@@ -61,21 +60,21 @@ def get_report_date_range():
         return start_hour, now.replace(hour=23, minute=59, second=0)
     
 
-def get_shifting_date():
+def get_shifting_date(branch_name):
     # Shifting Date will be set to yesterday when the current hour is between
-    # midnight and Closing Hour.
+    # midnight and Closing Hour (1 hour before opening hour of each branch).
     now = datetime.datetime.now()
 
-    if now.hour < CLOSING_HOUR:
+    if now.hour < OPENING_HOURS[branch_name] - 1:
         return now - datetime.timedelta(1)
     else:
         return now
 
 
-def get_start_and_end_date():
+def get_start_and_end_date(branch_name):
     # Start Date will be set to current shifting date,
     # while the End Date will be the next day.
-    shifting_date = get_shifting_date()
+    shifting_date = get_shifting_date(branch_name)
     return shifting_date, shifting_date + datetime.timedelta(1)
 
 
@@ -90,7 +89,7 @@ def get_start_and_end_time(branch_name: str, start_date: datetime.datetime, end_
 def get_laporan_sales_by_category(branch_name):
     branch_id = BRANCH_IDS[branch_name]
 
-    startdate, enddate = get_start_and_end_date()
+    startdate, enddate = get_start_and_end_date(branch_name)
     starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
 
     startdate = startdate.strftime('%d/%m/%Y')
@@ -238,7 +237,7 @@ def get_sales_by_category(branch_name, final=False):
 
         msg = \
             f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
             '*ITEM*\n' + \
