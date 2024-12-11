@@ -35,11 +35,6 @@ BRANCH_IDS = {
     'NARIPAN': 14376,
 }
 
-DEFAULT_TARGETS = {
-    'DAGO': [400, 400, 400, 400, 400, 1000, 500],
-    'NARIPAN': [200, 200, 200, 200, 200, 500, 400],
-}
-
 TARGETS = {
     'DAGO': args.targets[0],
     'NARIPAN': args.targets[1],
