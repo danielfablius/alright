@@ -11,7 +11,7 @@ import requests
 import time
 
 
-parser = argparse.ArgumentParser('1994 Auto Update Item')
+parser = argparse.ArgumentParser()
 parser.add_argument('targets', nargs=2, type=int, help='Target items for all branches, each for DAGO and NARIPAN, respectively.')
 parser.add_argument('interval', nargs='?', type=int, help='The interval in which the update should occur.', default=0)
 parser.add_argument('-s', '--skip-initial', action='store_true', help='Whether the update should trigger immediately or wait for the next interval.')
@@ -282,7 +282,9 @@ def get_seconds_to_sleep():
 
 
 if args.skip_initial:
-    time.sleep(get_seconds_to_sleep())
+    seconds_to_sleep = get_seconds_to_sleep()
+    print(f'Skipping initial update. Next update in {seconds_to_sleep // 60} minute(s).')
+    time.sleep(seconds_to_sleep)
 
 while True:
     now = datetime.datetime.now()
@@ -302,4 +304,6 @@ while True:
             except Exception as e:
                 print(e)
     
-    time.sleep(get_seconds_to_sleep())
+    seconds_to_sleep = get_seconds_to_sleep()
+    print(f'Update success. Next update in {seconds_to_sleep // 60} minute(s).')
+    time.sleep(seconds_to_sleep)
