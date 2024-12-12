@@ -282,7 +282,9 @@ def get_seconds_to_sleep():
 
 
 if args.skip_initial:
-    time.sleep(get_seconds_to_sleep())
+    seconds_to_sleep = get_seconds_to_sleep()
+    print(f'Skipping initial update. Next update in {seconds_to_sleep // 60} minute(s).')
+    time.sleep(seconds_to_sleep)
 
 while True:
     now = datetime.datetime.now()
@@ -302,4 +304,6 @@ while True:
             except Exception as e:
                 print(e)
     
-    time.sleep(get_seconds_to_sleep())
+    seconds_to_sleep = get_seconds_to_sleep()
+    print(f'Update success. Next update in {seconds_to_sleep // 60} minute(s).')
+    time.sleep(seconds_to_sleep)
