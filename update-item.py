@@ -250,7 +250,7 @@ def get_sales_by_category(branch_name, final=False):
     else:
         msg = \
             f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
             '*ITEM*\n' + \
