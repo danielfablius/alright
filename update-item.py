@@ -20,6 +20,7 @@ args = parser.parse_args()
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
 WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
+CLOSING_HOUR = 3
 
 cookies = {
     'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
