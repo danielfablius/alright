@@ -20,6 +20,7 @@ args = parser.parse_args()
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
 WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
+CLOSING_HOUR = 3
 
 cookies = {
     'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
@@ -249,7 +250,7 @@ def get_sales_by_category(branch_name, final=False):
     else:
         msg = \
             f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-            f'*{get_shifting_date().strftime("%d %B %Y")}*\n' + \
+            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
             '*ITEM*\n' + \
@@ -269,7 +270,7 @@ def get_sales_by_category(branch_name, final=False):
 def get_dynamic_interval():
     with open('interval_schema', 'r') as file:
         interval_schema = [int(line.strip()) for line in file]
-        return interval_schema[a]
+        return interval_schema[datetime.datetime.now().hour]
 
 
 def get_seconds_to_sleep():
