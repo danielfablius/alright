@@ -295,6 +295,8 @@ while True:
                 get_sales_by_category(branch, final=True)
             except Exception as e:
                 print(e)
+        
+        messenger.close_when_message_successfully_sent()
         break
 
     for branch in BRANCHES:
