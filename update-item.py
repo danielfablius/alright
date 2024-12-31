@@ -288,7 +288,7 @@ def get_sales_by_category(branch_name, final=False):
             f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
-            '*ITEM*\n' + \
+            '*ITEMS*\n' + \
             '\n'.join(ITEMS_PRINTS.splitlines()[:-1]) + \
             '\n' + \
             '\n' + \
@@ -300,10 +300,10 @@ def get_sales_by_category(branch_name, final=False):
             f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
-            '*ITEM*\n' + \
+            '*ITEMS*\n' + \
             ITEMS_PRINTS + \
             '\n' + \
-            '*OPEN BILL*\n' + \
+            '*OPEN BILLS*\n' + \
             OB_PRINTS + \
             '\n' + \
             f'*GRAND TOTAL: {GRAND_TOTAL}*\n' + \
