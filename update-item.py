@@ -128,6 +128,53 @@ def get_laporan_sales_by_category(branch_name):
     return pd.read_excel(f'laporan_sales_by_category_{branch_id}.xlsx', skiprows=7)
 
 
+def get_laporan_sales_by_item_detail(branch_name):
+    branch_id = BRANCH_IDS[branch_name]
+
+    startdate, enddate = get_start_and_end_date(branch_name)
+    starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
+
+    startdate = startdate.strftime('%d/%m/%Y')
+    enddate = enddate.strftime('%d/%m/%Y')
+
+    # The interval in which the sales report will be retrieved
+    print(f'{startdate} {starttime} - {enddate} {endtime}')
+
+    data = {
+        'radio-duration': 'all-day',
+        'time-left': '00',
+        'time-left': '00',
+        'time-right': '00',
+        'time-right': '00',
+        'branch': str(branch_id),
+        'arr_branch': str(branch_id),
+        'arr_staff': '',
+        'reportrange': f'{startdate} - {enddate}',
+        'duration': f'{starttime} - {endtime}',
+        'flagEachday': 'false',
+        'column': '[{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"void"}]',
+        'companyid': '8733',
+        'company_type': '0',
+    }
+
+    response = requests.post(
+        'https://backoffice.dretail.id/mpos-server/index.php/C_report_mt_salesitem/exportXlsDetail',
+        cookies=cookies,
+        data=data,
+    )
+
+    with open(f'laporan_sales_by_category_{branch_id}.xlsx', 'wb') as f:
+        f.write(response.content)
+
+    items = defaultdict(int)
+    item_sales = pd.read_excel(f'laporan_sales_by_category_{branch_id}.xlsx', skiprows=7)
+
+    for _, row in item_sales.iterrows():
+        items[row['Item Name']] += row['Item Sold'] + row['Item Void']
+    
+    return items
+
+
 def get_report_salesrealtime_detail(reffnumber):
     data = {
         'reffnumber': reffnumber,
