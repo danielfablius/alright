@@ -10,43 +10,63 @@ import pandas as pd
 import requests
 import time
 
+from branch import Branch
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument('targets', nargs=2, type=int, help='Target items for all branches, each for DAGO and NARIPAN, respectively.')
+parser.add_argument('targets', nargs=3, type=int, help='Target items for all branches, each for DAGO, NARIPAN, and SERANG respectively.')
 parser.add_argument('interval', nargs='?', type=int, help='The interval in which the update should occur.', default=0)
 parser.add_argument('-s', '--skip-initial', action='store_true', help='Whether the update should trigger immediately or wait for the next interval.')
 args = parser.parse_args()
 
 locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
 
-WHATSAPP_GROUP_NAME = 'KOORDINASI TARGET 1994'
-CLOSING_HOUR = 3
+whatsapp_group_koordinasi_bandung = 'KOORDINASI TARGET 1994 BANDUNG'
+whatsapp_group_koordinasi_serang = 'KOORDINASI TARGET 1994 SERANG'
 
-cookies = {
-    'csrf_cookie_mpos': '5b0c7b868ca031f555e490e9b29fd8de',
-    'cookiesession1': '582E227AX2XLTOJCDDGAQX84O1CA8C39',
-    'ci_session': 'a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5',
+DEPARTMENT_CATEGORY_LIST = {
+    'MINUMAN': ['espresso', 'teas', 'powder', 'espresso based', 'tea', 'powder based', 'large', 'mocktails', 'blend', 'manual', 'manual brew', ],
+    'MAKANAN': ['bites', 'dessert', 'eats', 'eats and bites', ],
 }
 
-BRANCHES = [
-    'DAGO',
-    'NARIPAN',
+branches = [
+    Branch(
+        [8733, ],
+        [10210, ],
+        'DAGO',
+        ['582E227AX2XLTOJCDDGAQX84O1CA8C39', ],
+        ['5b0c7b868ca031f555e490e9b29fd8de', ],
+        ['a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5', ],
+        args.targets[0],
+        whatsapp_group_koordinasi_bandung,
+        10,
+        3,
+    ),
+    Branch(
+        [8733, ],
+        [14376, ],
+        'NARIPAN',
+        ['582E227AX2XLTOJCDDGAQX84O1CA8C39', ],
+        ['5b0c7b868ca031f555e490e9b29fd8de', ],
+        ['a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5', ],
+        args.targets[1],
+        whatsapp_group_koordinasi_bandung,
+        8,
+        3,
+    ),
+    Branch(
+        [8733, 13182, ],
+        [16284, 16179, ],
+        'SERANG',
+        ['582E227AX2XLTOJCDDGAQX84O1CA8C39', '865038d2211cd111b16dd23e39ea342f', ],
+        ['5b0c7b868ca031f555e490e9b29fd8de', '6549F75F84PCI8HOCAIWBM2P5E3K070F', ],
+        ['a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5', 'b8YFauEf1FfJjVu%2Fx1wHRvYBDnbRS6CKIQBAYUDqyWK0nszbtZMb2HuUILEBZsNHo%2FRZRGOjhaH4LGkj%2BlQlu5Uy55iSOsJOydM45NJlbf2X6RfQG%2Fj2fLc7LeHYlxkp2C0S9A%2F5Rrs7O5%2BxQXWdX41Qmgir6FLKSu%2Bkt4aoVShlRgXAesQHjDPRS3sHSRr3CCQCRz%2BFTyWG1fUTObOMVdcrfmE9Qmfz6Qs6SGOoxsHnOHDenAhDFdY3UdTaCgEsJZ9xbH5vrQR0F3%2FSfYVsm6QkZEQkCuZqaNE8G1tCMC8RDqZGwOK54635aB5jx8ViSH4USbax2cpY9RJ0laC1bKa321gp7Kr%2BE9RMTqp7sw3AJfIhxFzL0evIgmVriCmonqkGN16rJv2yE1aBNDrlvrHjOlDutEEiZMmwx7JVFbM%3Dbfd16832cae10478f51a7e7257ac9c15087e5a93', ],
+        args.targets[2],
+        whatsapp_group_koordinasi_serang,
+        8,
+        3,
+    )
 ]
-
-BRANCH_IDS = {
-    'DAGO': 10210,
-    'NARIPAN': 14376,
-}
-
-OPENING_HOURS = {
-    'DAGO': 10,
-    'NARIPAN': 8,
-}
-
-TARGETS = {
-    'DAGO': args.targets[0],
-    'NARIPAN': args.targets[1],
-}
 
 messenger = WhatsApp()
 
@@ -59,45 +79,11 @@ def get_report_date_range():
         return (start_hour - datetime.timedelta(1)), (now-datetime.timedelta(1)).replace(hour=4, minute=0, second=0)
     else:
         return start_hour, now.replace(hour=23, minute=59, second=0)
-    
-
-def get_shifting_date(branch_name):
-    # Shifting Date will be set to yesterday when the current hour is between
-    # midnight and Closing Hour (1 hour before opening hour of each branch).
-    now = datetime.datetime.now()
-
-    if now.hour < OPENING_HOURS[branch_name] - 1:
-        return now - datetime.timedelta(1)
-    else:
-        return now
 
 
-def get_start_and_end_date(branch_name):
-    # Start Date will be set to current shifting date,
-    # while the End Date will be the next day.
-    shifting_date = get_shifting_date(branch_name)
-    return shifting_date, shifting_date + datetime.timedelta(1)
-
-
-def get_start_and_end_time(branch_name: str, start_date: datetime.datetime, end_date: datetime.datetime):
-    # Start Time will be set to Opening Hour of the shifting date,
-    # while the End Time will always be set to an hour before Opening Hour of end_date.
-    start_time = start_date.replace(hour=OPENING_HOURS[branch_name], minute=0, second=0).strftime('%H:%M')
-    end_time = end_date.replace(hour=OPENING_HOURS[branch_name] - 1, minute=0, second=0).strftime('%H:%M')
-    return start_time, end_time
-
-
-def get_laporan_sales_by_category(branch_name):
-    branch_id = BRANCH_IDS[branch_name]
-
-    startdate, enddate = get_start_and_end_date(branch_name)
-    starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
-
-    startdate = startdate.strftime('%d/%m/%Y')
-    enddate = enddate.strftime('%d/%m/%Y')
-
+def get_laporan_sales_by_category(branch_id, company_id, start_date, start_time, end_date, end_time, cookies):
     # The interval in which the sales report will be retrieved
-    print(f'{startdate} {starttime} - {enddate} {endtime}')
+    print(f'{branch.get_start_date_string()} {branch.get_start_time()} - {branch.get_end_date_string()} {branch.get_end_time()}')
 
     data = {
         'radio-duration': 'all-day',
@@ -108,11 +94,11 @@ def get_laporan_sales_by_category(branch_name):
         'branch': str(branch_id),
         'arr_branch': str(branch_id),
         'arr_staff': '',
-        'reportrange': f'{startdate} - {enddate}',
-        'duration': f'{starttime} - {endtime}',
+        'reportrange': f'{start_date} - {end_date}',
+        'duration': f'{start_time} - {end_time}',
         'flagEachday': 'false',
         'column': '[{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"void"}]',
-        'companyid': '8733',
+        'companyid': company_id,
         'company_type': '0',
     }
 
@@ -175,27 +161,29 @@ def get_laporan_sales_by_item_detail(branch_name):
     return items
 
 
-def get_report_salesrealtime_detail(reffnumber):
-    data = {
-        'reffnumber': reffnumber,
-    }
+def get_report_salesrealtime_detail(cookies):
+    def get_report(reffnumber):
+        data = {
+            'reffnumber': reffnumber,
+        }
 
-    response = requests.post(
-        'https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/details',
-        cookies=cookies,
-        data=data,
-    )
+        response = requests.post(
+            'https://backoffice.dretail.id/mpos-server/index.php/C_report_salesrealtime/details',
+            cookies=cookies,
+            data=data,
+        )
 
-    opbill_data = json.loads(response.content)
-    
-    # still unknown why sometimes it returns a list instead of detail
-    if type(opbill_data['txnproductitem']) == list:
-        return []
+        opbill_data = json.loads(response.content)
+        
+        # still unknown why sometimes it returns a list instead of detail
+        if type(opbill_data['txnproductitem']) == list:
+            return []
 
-    return opbill_data['txnproductitem']['detail']
+        return opbill_data['txnproductitem']['detail']
+    return get_report
 
 
-def get_open_bill(branch_id):
+def get_open_bill(branch_id, cookies):
     data = {
         'draw': '1',
         'branch': str(branch_id),
@@ -214,37 +202,20 @@ def get_open_bill(branch_id):
 
     salesrealtime_data = json.loads(response.content)
     reffnumbers = filter(lambda x: x != '', map(itemgetter('reff_number'), salesrealtime_data['data']))
-    open_bills = list(filter(lambda x: len(x) != 0, map(get_report_salesrealtime_detail, reffnumbers)))
+    open_bills = list(filter(lambda x: len(x) != 0, map(get_report_salesrealtime_detail(cookies), reffnumbers)))
     
     # convert into flat list of items
     open_bills = [item for sublist in open_bills for item in sublist]
-
-    ob_items = defaultdict(int)
-
-    for item in open_bills:
-        ob_items[item['catName']] += item['qty'] - item['voidQty']
-    
-    return ob_items
-
-
-def get_target(branch_name, TOTAL):
-    TARGET = TARGETS[branch_name]
-    
-    if TOTAL > TARGET:
-        TARGET = 50 * ((TOTAL // 50) + 1)
-    
-    return TARGET
+    return open_bills
 
 
 def print_items(items):
-    MINUMAN = items['ESPRESSO BASED'] + items['POWDER BASED'] + items['MOCKTAIL'] + items['MANUAL BREW'] + items['TEA'] + items['LARGE']
-    MAKANAN = items['EATS AND BITES']
-    BEER = items['BEER']
-    ROKOK = items['ROKOK']
-    MERCHANDISE = items['MERCHANDISE']
-    PAKET_BUKBER = items['PAKET BUKBER']
-    PAKET_PROMO = items['PAKET PROMO']
+    MINUMAN = sum([items[x] for x in items.keys() if x.lower() in DEPARTMENT_CATEGORY_LIST['MINUMAN']])
+    MAKANAN = sum([items[x] for x in items.keys() if x.lower() in DEPARTMENT_CATEGORY_LIST['MAKANAN']])
+    BEER = items['Beer'] + items['BEER']
+    ROKOK = items['Rokok'] + items['ROKOK']
     EVENT = items['Event']
+    MERCHANDISE = items['Merchandise']
     OPEN_BILL = items.get('OPEN_BILL')
     PARKIR = items['Parkir']
     TOTAL = MINUMAN + MAKANAN + BEER
@@ -253,30 +224,42 @@ def print_items(items):
         f'MAKANAN: {MAKANAN}\n' + \
         (f'BEER: {BEER}\n' if BEER else '') + \
         (f'ROKOK: {ROKOK}\n' if ROKOK else '') + \
-        (f'MERCHANDISE: {MERCHANDISE}\n' if MERCHANDISE else '') + \
-        (f'PAKET/PROMO: {PAKET_PROMO}\n' if PAKET_PROMO else '') + \
         (f'EVENT: {EVENT}\n' if EVENT else '') + \
-        (f'PAKET BUKBER: {PAKET_BUKBER}\n' if PAKET_BUKBER else '') + \
+        (f'MERCHANDISE: {MERCHANDISE}\n' if MERCHANDISE else '') + \
         (f'OPEN BILL: {OPEN_BILL}\n' if OPEN_BILL else '') + \
         (f'PARKIR: {PARKIR}\n' if PARKIR else '') + \
         f'_*TOTAL: {TOTAL}*_\n'
 
 
-def get_sales_by_category(branch_name, final=False):
+def get_sales_by_category(branch, final=False):
     items = defaultdict(int)
-    df_laporan_sales = get_laporan_sales_by_category(branch_name)
+    ob_items = defaultdict(int)
 
-    for _, row in df_laporan_sales.iterrows():
-        items[row['Category']] += row['Item Sold'] - row['Item Void']
+    for backoffice in branch.backoffices:
+        df_laporan_sales = get_laporan_sales_by_category(
+            backoffice.branch_id,
+            backoffice.company_id,
+            branch.get_start_date_string(),
+            branch.get_start_time(),
+            branch.get_end_date_string(),
+            branch.get_end_time(),
+            backoffice.get_cookies()
+        )
 
-    OPEN_BILL = get_open_bill(BRANCH_IDS[branch_name])
+        for _, row in df_laporan_sales.iterrows():
+            items[row['Category']] += row['Item Sold'] - row['Item Void']
+        
+        df_open_bill_sales = get_open_bill(backoffice.branch_id, backoffice.get_cookies())
+
+        for item in df_open_bill_sales:
+            ob_items[item['catName']] += item['qty'] - item['voidQty']
 
     TOTAL_ITEMS, ITEMS_PRINTS = print_items(items)
-    TOTAL_OB, OB_PRINTS = print_items(OPEN_BILL)
+    TOTAL_OB, OB_PRINTS = print_items(ob_items)
 
     GRAND_TOTAL = TOTAL_ITEMS + TOTAL_OB
 
-    TARGET = get_target(branch_name, GRAND_TOTAL)
+    TARGET = branch.get_target(GRAND_TOTAL)
 
     if final:
         # Regenerate Items Prints with Open Bill
@@ -284,8 +267,8 @@ def get_sales_by_category(branch_name, final=False):
         TOTAL_ITEMS, ITEMS_PRINTS = print_items(items)
 
         msg = \
-            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
+            f'*[AUTO] UPDATE ITEM {branch.name}*\n' + \
+            f'*{branch.get_shifting_date().strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
             '*ITEMS*\n' + \
@@ -296,8 +279,8 @@ def get_sales_by_category(branch_name, final=False):
             f'*MINUS: {TARGET - GRAND_TOTAL}*\n'
     else:
         msg = \
-            f'*[AUTO] UPDATE ITEM {branch_name}*\n' + \
-            f'*{get_shifting_date(branch_name).strftime("%d %B %Y")}*\n' + \
+            f'*[AUTO] UPDATE ITEM {branch.name}*\n' + \
+            f'*{branch.get_shifting_date().strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
             '*ITEMS*\n' + \
@@ -311,7 +294,7 @@ def get_sales_by_category(branch_name, final=False):
 
     print(msg)
 
-    messenger.send_direct_message(WHATSAPP_GROUP_NAME, msg)
+    messenger.send_direct_message(branch.whatsapp_group_name, msg)
 
 
 def get_dynamic_interval():
@@ -328,28 +311,22 @@ def get_seconds_to_sleep():
     return minutes_to_sleep * 60 - now.second
 
 
+def should_do_final():
+    now = datetime.datetime.now()
+    return now.hour == 3 and now.minute == 0
+
+
 if args.skip_initial:
     seconds_to_sleep = get_seconds_to_sleep()
     print(f'Skipping initial update. Next update in {seconds_to_sleep // 60} minute(s).')
     time.sleep(seconds_to_sleep)
 
-while True:
-    now = datetime.datetime.now()
-    
-    if CLOSING_HOUR <= now.hour < min(OPENING_HOURS.values()):
-        for branch in BRANCHES:
-            try:
-                get_sales_by_category(branch, final=True)
-            except Exception as e:
-                print(e)
-        
-        messenger.close_when_message_successfully_sent()
-        break
 
-    for branch in BRANCHES:
-        if not (CLOSING_HOUR <= now.hour < OPENING_HOURS[branch]):
+while True:
+    for branch in branches:
+        if not (branch.closing_hour <= datetime.datetime.now().hour < branch.opening_hour):
             try:
-                get_sales_by_category(branch)
+                get_sales_by_category(branch, should_do_final())
             except Exception as e:
                 print(e)
     
