@@ -194,6 +194,7 @@ def get_open_bill(branch_id, cookies):
 def print_items(items):
     MINUMAN = sum([items[x] for x in items.keys() if x.lower() in DEPARTMENT_CATEGORY_LIST['MINUMAN']])
     MAKANAN = sum([items[x] for x in items.keys() if x.lower() in DEPARTMENT_CATEGORY_LIST['MAKANAN']])
+    MINERAL_WATER = sum([items[x] for x in items.keys() if x.lower() == 'mineral water'])
     BEER = items['Beer'] + items['BEER']
     ROKOK = items['Rokok'] + items['ROKOK']
     EVENT = items['Event']
@@ -204,6 +205,7 @@ def print_items(items):
 
     return TOTAL, f'MINUMAN: {MINUMAN}\n' + \
         f'MAKANAN: {MAKANAN}\n' + \
+        (f'MINERAL WATER: {MINERAL_WATER}\n' if MINERAL_WATER else '') + \
         (f'BEER: {BEER}\n' if BEER else '') + \
         (f'ROKOK: {ROKOK}\n' if ROKOK else '') + \
         (f'EVENT: {EVENT}\n' if EVENT else '') + \
