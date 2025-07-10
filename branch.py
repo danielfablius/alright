@@ -18,17 +18,21 @@ class BackofficeBranch:
 
 
 class Branch:
-    def __init__(self, company_ids, branch_ids, name, cookiesession1s, csrf_cookie_mposs, ci_sessions, target, whatsapp_group_name, opening_hour, closing_hour=3):
+    def __init__(self, company_ids, branch_ids, name, cookiesession1s, csrf_cookie_mposs, ci_sessions, target, whatsapp_group_name, opening_hour, closing_hour=3, default_targets=None):
         self.company_ids = company_ids
         self.branch_ids = branch_ids
         self.name = name
         self.backoffices = [BackofficeBranch(company_ids[x], branch_ids[x], cookiesession1s[x], csrf_cookie_mposs[x], ci_sessions[x]) for x in range(len(branch_ids))]
         self.target = target
+        self.default_targets = default_targets
         self.whatsapp_group_name = whatsapp_group_name
         self.opening_hour = opening_hour
         self.closing_hour = closing_hour
     
     def get_target(self, grand_total):
+        if self.default_targets is not None:
+            self.target = self.default_targets[datetime.datetime.weekday(self.get_shifting_date())]
+            
         if grand_total > self.target:
             self.target = 50 * ((grand_total // 50) + 1)
         
