@@ -245,13 +245,13 @@ def get_sales_by_category(branch, final=False):
 
     TARGET = branch.get_target(GRAND_TOTAL)
 
-    if final:
+    if final and TOTAL_OB == 0:
         # Regenerate Items Prints with Open Bill
         items['OPEN_BILL'] = TOTAL_OB
         TOTAL_ITEMS, ITEMS_PRINTS = print_items(items)
 
         msg = \
-            f'*[AUTO] UPDATE ITEM {branch.name}*\n' + \
+            f'*FINAL ITEM {branch.name}*\n' + \
             f'*{branch.get_shifting_date().strftime("%d %B %Y")}*\n' + \
             f'*TARGET*: {TARGET}\n' + \
             '\n' + \
@@ -295,9 +295,10 @@ def get_seconds_to_sleep():
     return minutes_to_sleep * 60 - now.second
 
 
-def should_do_final():
+def should_do_final(branch):
     now = datetime.datetime.now()
-    return now.hour == 3 and now.minute == 0
+    # has_final = final_item_recorder[branch.branch_id][branch.get_shifting_date().date()] = True
+    return branch.closing_hour <= now.hour <= branch.closing_hour + 1
 
 
 if args.skip_initial:
@@ -308,9 +309,9 @@ if args.skip_initial:
 
 while True:
     for branch in branches:
-        if not (branch.closing_hour <= datetime.datetime.now().hour < branch.opening_hour):
+        if not (branch.closing_hour < datetime.datetime.now().hour < branch.opening_hour):
             try:
-                get_sales_by_category(branch, should_do_final())
+                get_sales_by_category(branch, should_do_final(branch))
             except Exception as e:
                 print(e)
     
