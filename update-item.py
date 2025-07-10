@@ -41,6 +41,7 @@ branches = [
         whatsapp_group_koordinasi_bandung,
         10,
         3,
+        (450, 450, 450, 450, 600, 1000, 600, ),
     ),
     Branch(
         [8733, ],
@@ -53,6 +54,33 @@ branches = [
         whatsapp_group_koordinasi_bandung,
         8,
         3,
+        (350, 350, 350, 350, 450, 600, 450, ),
+    ),
+    Branch(
+        [8733, ],
+        [16284, ],
+        'SERANG ATAS',
+        ['582E227AX2XLTOJCDDGAQX84O1CA8C39', ],
+        ['5b0c7b868ca031f555e490e9b29fd8de', ],
+        ['a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5', ],
+        args.targets[2],
+        whatsapp_group_koordinasi_serang,
+        10,
+        3,
+        (1000, 1000, 1000, 1000, 1500, 2000, 1500, ),
+    ),
+    Branch(
+        [13182, ],
+        [16179, ],
+        'SERANG BAWAH',
+        ['865038d2211cd111b16dd23e39ea342f', ],
+        ['6549F75F84PCI8HOCAIWBM2P5E3K070F', ],
+        ['b8YFauEf1FfJjVu%2Fx1wHRvYBDnbRS6CKIQBAYUDqyWK0nszbtZMb2HuUILEBZsNHo%2FRZRGOjhaH4LGkj%2BlQlu5Uy55iSOsJOydM45NJlbf2X6RfQG%2Fj2fLc7LeHYlxkp2C0S9A%2F5Rrs7O5%2BxQXWdX41Qmgir6FLKSu%2Bkt4aoVShlRgXAesQHjDPRS3sHSRr3CCQCRz%2BFTyWG1fUTObOMVdcrfmE9Qmfz6Qs6SGOoxsHnOHDenAhDFdY3UdTaCgEsJZ9xbH5vrQR0F3%2FSfYVsm6QkZEQkCuZqaNE8G1tCMC8RDqZGwOK54635aB5jx8ViSH4USbax2cpY9RJ0laC1bKa321gp7Kr%2BE9RMTqp7sw3AJfIhxFzL0evIgmVriCmonqkGN16rJv2yE1aBNDrlvrHjOlDutEEiZMmwx7JVFbM%3Dbfd16832cae10478f51a7e7257ac9c15087e5a93', ],
+        args.targets[2],
+        whatsapp_group_koordinasi_serang,
+        10,
+        3,
+        (1000, 1000, 1000, 1000, 1500, 2000, 1500, ),
     ),
     Branch(
         [8733, 13182, ],
@@ -63,9 +91,10 @@ branches = [
         ['a%3A4%3A%7Bs%3A10%3A%22session_id%22%3Bs%3A32%3A%22e1f12245cd75ec9cb853eb10efe2cc47%22%3Bs%3A10%3A%22ip_address%22%3Bs%3A13%3A%2210.100.100.62%22%3Bs%3A10%3A%22user_agent%22%3Bs%3A111%3A%22Mozilla%2F5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F111.0.0.0+Safari%2F537.36%22%3Bs%3A13%3A%22last_activity%22%3Bi%3A1681234190%3B%7Dd6f22faf3f2fdf22bcb4c85ccbe5e18db99b45b5', 'b8YFauEf1FfJjVu%2Fx1wHRvYBDnbRS6CKIQBAYUDqyWK0nszbtZMb2HuUILEBZsNHo%2FRZRGOjhaH4LGkj%2BlQlu5Uy55iSOsJOydM45NJlbf2X6RfQG%2Fj2fLc7LeHYlxkp2C0S9A%2F5Rrs7O5%2BxQXWdX41Qmgir6FLKSu%2Bkt4aoVShlRgXAesQHjDPRS3sHSRr3CCQCRz%2BFTyWG1fUTObOMVdcrfmE9Qmfz6Qs6SGOoxsHnOHDenAhDFdY3UdTaCgEsJZ9xbH5vrQR0F3%2FSfYVsm6QkZEQkCuZqaNE8G1tCMC8RDqZGwOK54635aB5jx8ViSH4USbax2cpY9RJ0laC1bKa321gp7Kr%2BE9RMTqp7sw3AJfIhxFzL0evIgmVriCmonqkGN16rJv2yE1aBNDrlvrHjOlDutEEiZMmwx7JVFbM%3Dbfd16832cae10478f51a7e7257ac9c15087e5a93', ],
         args.targets[2],
         whatsapp_group_koordinasi_serang,
-        8,
+        10,
         3,
-    )
+        (1000, 1000, 1000, 1000, 1500, 2000, 1500, ),
+    ),
 ]
 
 messenger = WhatsApp()
@@ -112,53 +141,6 @@ def get_laporan_sales_by_category(branch_id, company_id, start_date, start_time,
         f.write(response.content)
     
     return pd.read_excel(f'laporan_sales_by_category_{branch_id}.xlsx', skiprows=7)
-
-
-def get_laporan_sales_by_item_detail(branch_name):
-    branch_id = BRANCH_IDS[branch_name]
-
-    startdate, enddate = get_start_and_end_date(branch_name)
-    starttime, endtime = get_start_and_end_time(branch_name, startdate, enddate)
-
-    startdate = startdate.strftime('%d/%m/%Y')
-    enddate = enddate.strftime('%d/%m/%Y')
-
-    # The interval in which the sales report will be retrieved
-    print(f'{startdate} {starttime} - {enddate} {endtime}')
-
-    data = {
-        'radio-duration': 'all-day',
-        'time-left': '00',
-        'time-left': '00',
-        'time-right': '00',
-        'time-right': '00',
-        'branch': str(branch_id),
-        'arr_branch': str(branch_id),
-        'arr_staff': '',
-        'reportrange': f'{startdate} - {enddate}',
-        'duration': f'{starttime} - {endtime}',
-        'flagEachday': 'false',
-        'column': '[{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"void"}]',
-        'companyid': '8733',
-        'company_type': '0',
-    }
-
-    response = requests.post(
-        'https://backoffice.dretail.id/mpos-server/index.php/C_report_mt_salesitem/exportXlsDetail',
-        cookies=cookies,
-        data=data,
-    )
-
-    with open(f'laporan_sales_by_category_{branch_id}.xlsx', 'wb') as f:
-        f.write(response.content)
-
-    items = defaultdict(int)
-    item_sales = pd.read_excel(f'laporan_sales_by_category_{branch_id}.xlsx', skiprows=7)
-
-    for _, row in item_sales.iterrows():
-        items[row['Item Name']] += row['Item Sold'] + row['Item Void']
-    
-    return items
 
 
 def get_report_salesrealtime_detail(cookies):
