@@ -26,7 +26,7 @@ whatsapp_group_koordinasi_serang = 'KOORDINASI TARGET 1994 SERANG'
 
 DEPARTMENT_CATEGORY_LIST = {
     'MINUMAN': ['espresso', 'teas', 'powder', 'espresso based', 'tea', 'powder based', 'large', 'mocktails', 'blend', 'manual', 'manual brew', ],
-    'MAKANAN': ['bites', 'dessert', 'eats', 'eats and bites', ],
+    'MAKANAN': ['bites', 'dessert', 'eats', 'eats and bites', 'rice bowl', ],
 }
 
 branches = [
