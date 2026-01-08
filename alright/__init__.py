@@ -158,7 +158,7 @@ class WhatsApp(object):
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="side"]/div[1]/div/div/div[1]/div/div[1]',
+                    '//*[@id="side"]/div[1]/div/div[2]/div/div/div',
                 )
             )
         )
@@ -464,7 +464,7 @@ class WhatsApp(object):
         """
         try:
             inp_xpath = (
-                '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
+                '//*[@id="main"]/footer/div/div/span/div/div/div/div[3]/div[1]/p'
             )
             input_box = self.wait.until(
                 EC.presence_of_element_located((By.XPATH, inp_xpath))
@@ -528,7 +528,7 @@ class WhatsApp(object):
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="app"]/div[1]/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[2]/div[2]/div/div/span',
+                    '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[2]/div[2]/div/div',
                 )
             )
         )
@@ -558,7 +558,7 @@ class WhatsApp(object):
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div/ul/div/div[2]/li/div/input',
+                        '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[2]/li/div/input',
                     )
                 )
             )
