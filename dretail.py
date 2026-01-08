@@ -6,6 +6,25 @@ def get_laporan_sales_by_item_detail(branch_id, company_id, start_date, start_ti
     # The interval in which the sales report will be retrieved
     print(f'{start_date} {start_time} - {end_date} {end_time}')
 
+    s = requests.Session()
+
+    s.get("https://backoffice.dretail.id/")
+
+    csrf = s.cookies.get("csrf_cookie_mpos")
+    if not csrf:
+        raise RuntimeError("No CSRF cookie set. Make sure you're logged in and the domain is reachable.")
+
+    # s.headers.update({
+    #     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    #     "Accept-Language": "en-GB,en;q=0.9,id;q=0.8",
+    #     "Cache-Control": "max-age=0",
+    #     "Connection": "keep-alive",
+    #     "DNT": "1",
+    #     "Origin": "https://backoffice.dretail.id",
+    #     "Referer": "https://backoffice.dretail.id/",
+    #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    # })
+
     data = {
         'radio-duration': 'all-day',
         'time-left': '00',
@@ -21,6 +40,8 @@ def get_laporan_sales_by_item_detail(branch_id, company_id, start_date, start_ti
         'column': '[{"name":"column[]","value":"item_name"},{"name":"column[]","value":"modifier"},{"name":"column[]","value":"category_name"},{"name":"column[]","value":"qty"},{"name":"column[]","value":"grosssales"},{"name":"column[]","value":"void"},{"name":"column[]","value":"voidamount"},{"name":"column[]","value":"discount"},{"name":"column[]","value":"discount_bill"},{"name":"column[]","value":"amount_redeem"},{"name":"column[]","value":"total"},{"name":"column[]","value":"service"},{"name":"column[]","value":"tax"},{"name":"column[]","value":"grandtotal"}]',
         'companyid': company_id,
         'company_type': '0',
+        'modifier_report': '',
+        'inventory_type': 'mpos',
     }
 
     response = requests.post(

@@ -11,12 +11,13 @@ from branch import Branch
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('month', nargs='?', type=int, default=datetime.datetime.today().month)
 parser.add_argument('year', nargs='?', type=int, default=datetime.datetime.today().year)
+parser.add_argument('month', nargs='?', type=int, default=datetime.datetime.today().month)
+parser.add_argument('day', nargs='?', type=int, default=datetime.datetime.today().day)
 args = parser.parse_args()
 
 branch = Branch(
-    [8733, 13182, ],
+    ["ODczMw==", "MTMxODI=", ],
     [16284, 16179, ],
     'SERANG',
     ['582E227AX2XLTOJCDDGAQX84O1CA8C39', '865038d2211cd111b16dd23e39ea342f', ],
@@ -51,20 +52,20 @@ wb = Workbook()
 ws = wb.active
 ws.title = f'{calendar.month_name[args.month]} {args.year}'
 
-start_time = datetime.datetime(args.year, args.month, 29, 10, 0, 0)
-end_time   = start_time + relativedelta(days=2, hour=1)
+start_time = datetime.datetime(args.year, args.month, args.day, 10, 0, 0)
+end_time   = start_time + relativedelta(days=1, hour=6)
 current_time = start_time
 
 while current_time < end_time:
     shifting_start_time = current_time
-    shifting_end_time = current_time + relativedelta(days=1, hour=3)
+    shifting_end_time = current_time + relativedelta(days=1, hour=6)
     cell_row = 1
     ws.cell(row=1, column=shifting_start_time.day + 1, value=shifting_start_time.day)
     print(shifting_start_time)
 
     while current_time < shifting_end_time:
         menus = defaultdict(int)
-        current_end_time = current_time + relativedelta(hours=1)
+        current_end_time = current_time + relativedelta(minute=59, second=59)
 
         for backoffice in branch.backoffices:
             df_sales_report = dretail.get_laporan_sales_by_item_detail(
@@ -90,7 +91,7 @@ while current_time < end_time:
         ws.cell(row=cell_row + 1, column=shifting_start_time.day + 1, value=sum(menus.values()))
         ws.cell(row=cell_row + 1, column=1, value=current_time.hour)
         print(menus)
-        current_time = current_end_time
+        current_time = current_end_time + relativedelta(seconds=1)
         cell_row += 1
     
     current_time = shifting_start_time + relativedelta(days=1, hour=10)
