@@ -1,0 +1,158 @@
+curl ^"https://backoffice.dretail.id/mpos-server/index.php/C_report_mt_salesitem/exportXls^" ^
+  -H ^"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7^" ^
+  -H ^"Accept-Language: en-GB,en;q=0.9,id;q=0.8^" ^
+  -H ^"Cache-Control: max-age=0^" ^
+  -H ^"Connection: keep-alive^" ^
+  -H ^"Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryj2DImlp4NnA2PBr5^" ^
+  -b ^"cookiesession1=6549F75FUUFMS1WAY32WO6LINELE566D; csrf_cookie_mpos=7e2158fd92a4624bb6e31742b74d3f7d; ci_session=0zdbjVgbsXAi77t0J9AhExHSgqv^%^2FKD2qvTwOyb7M0KM5QpjuJ9y2Tr6VE^%^2BANQ^%^2FCouRmF9oXibrz2mCUNQlcQOORdxvb3XQQ1h76nK70C^%^2ByjIQd5Dh0Pnf^%^2FmO^%^2BmWwtootRyC3EyvimAl1P8aW^%^2FqgG^%^2Bu^%^2FUy^%^2BpCsCcAHrL8h2NTOB416RBjQFa9k3u0Jhq44gTd0q4IWPSWpgcOTwMCmpoJUUM^%^2F8U444g^%^2Fr^%^2B^%^2BZuJ0xG5DRPD9gwnNf27ZdXL0p7DAXcqNxv99V4hPGL0H4ML6C^%^2BCOV6eATN^%^2F193aaoXlQn5MKflJxdq3wkdSJ7lX6bJVn^%^2F5x1GXZAT85AwOz4rGEm44o2arKldWLf2z4sI6lWTkC^%^2BLy1JoeNVodyPrqPS7775jYg8W28R^%^2FkW1kTOVGVXJDZaS0eiFrTVXMYpxxdhGQPXlU^%^3D6996c8fb5ab73469ac95cfcde803768f75984cf4^" ^
+  -H ^"DNT: 1^" ^
+  -H ^"Origin: https://backoffice.dretail.id^" ^
+  -H ^"Referer: https://backoffice.dretail.id/^" ^
+  -H ^"Sec-Fetch-Dest: document^" ^
+  -H ^"Sec-Fetch-Mode: navigate^" ^
+  -H ^"Sec-Fetch-Site: same-origin^" ^
+  -H ^"Sec-Fetch-User: ?1^" ^
+  -H ^"Upgrade-Insecure-Requests: 1^" ^
+  -H ^"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36^" ^
+  -H ^"sec-ch-ua: ^\^"Not;A=Brand^\^";v=^\^"99^\^", ^\^"Google Chrome^\^";v=^\^"139^\^", ^\^"Chromium^\^";v=^\^"139^\^"^" ^
+  -H ^"sec-ch-ua-mobile: ?0^" ^
+  -H ^"sec-ch-ua-platform: ^\^"Windows^\^"^" ^
+  --data-raw ^"------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"csrf_token_mpos^\^"^
+
+^
+
+7e2158fd92a4624bb6e31742b74d3f7d^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"radio-duration^\^"^
+
+^
+
+all-day^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"time-left^\^"^
+
+^
+
+00^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"time-left^\^"^
+
+^
+
+00^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"time-right^\^"^
+
+^
+
+00^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"time-right^\^"^
+
+^
+
+00^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"branch^\^"^
+
+^
+
+0^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"arr_branch^\^"^
+
+^
+
+0^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"arr_staff^\^"^
+
+^
+
+^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"reportrange^\^"^
+
+^
+
+13/08/2025 - 13/08/2025^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"duration^\^"^
+
+^
+
+00:00 - 00:00^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"flagEachday^\^"^
+
+^
+
+false^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"column^\^"^
+
+^
+
+^[^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"item_name^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"modifier^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"category_name^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"qty^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"grosssales^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"void^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"voidamount^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"discount^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"discount_bill^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"amount_redeem^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"total^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"service^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"tax^\^"^},^{^\^"name^\^":^\^"column^[^]^\^",^\^"value^\^":^\^"grandtotal^\^"^}^]^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"companyid^\^"^
+
+^
+
+ODczMw==^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"company_type^\^"^
+
+^
+
+^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"modifier_report^\^"^
+
+^
+
+^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5^
+
+Content-Disposition: form-data; name=^\^"inventory_type^\^"^
+
+^
+
+mpos^
+
+------WebKitFormBoundaryj2DImlp4NnA2PBr5--^
+
+^"

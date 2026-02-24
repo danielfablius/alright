@@ -200,8 +200,10 @@ def get_open_bill(branch_id, cookies):
         headers=headers,
         data=data,
     )
-
+    print(response.headers)
+    print(response.status_code)
     salesrealtime_data = json.loads(response.content)
+    print(salesrealtime_data)
     reffnumbers = filter(lambda x: x != '', map(itemgetter('reff_number'), salesrealtime_data['data']))
     open_bills = list(filter(lambda x: len(x) != 0, map(get_report_salesrealtime_detail(cookies), reffnumbers)))
 
