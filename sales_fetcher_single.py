@@ -17,7 +17,7 @@ parser.add_argument('day', nargs='?', type=int, default=datetime.datetime.today(
 args = parser.parse_args()
 
 branch = Branch(
-    [8733, 13182, ],
+    ["ODczMw==", "MTMxODI=", ],
     [16284, 16179, ],
     'SERANG',
     ['582E227AX2XLTOJCDDGAQX84O1CA8C39', '865038d2211cd111b16dd23e39ea342f', ],
@@ -30,23 +30,31 @@ branch = Branch(
     (1000, 1000, 1000, 1000, 1500, 2000, 1500, ),
 )
 
+aliases = {
+    'CRAY Milk': 'Coffee Milk CRAY',
+    'CRAY': 'Coffee Milk CRAY',
+    'Lycano': 'Liecano',
+    'Cookies n Cream': 'Cookies n’ Cream',
+    'Regal Vanilla': 'Vanilla Regal',
+    'Tropical Berry': 'Tropical Berries',
+}
+
 modifiers = {
-     ''
-      'Hot Chocolate': {
-            'Mint': 'Hot Chocolate Mint',
-            'Strawberry': 'Hot Chocolate Berry',
-      },
-      'Iced Chocolate': {
-            'Mint': 'Iced Chocolate Mint',
-            'Strawberry': 'Iced Chocolate Berry',
-      },
-      'Iced Chocolate Large': {
-            'Mint': 'Iced Chocolate Mint Large',
-            'Strawberry': 'Iced Chocolate Berry Large',
-      },
-      'Pisang': {
-            'Keju': 'Pisang Keju',
-      },
+    'Hot Chocolate': {
+        'Mint': 'Hot Chocolate',
+        'Strawberry': 'Hot Chocolate',
+    },
+    'Iced Chocolate': {
+        'Mint': 'Iced Chocolate Mint',
+        'Strawberry': 'Iced Chocolate Berry',
+    },
+    'Iced Chocolate Large': {
+        'Mint': 'Iced Chocolate Mint Large',
+        'Strawberry': 'Iced Chocolate Berry Large',
+    },
+    'Pisang': {
+        'Keju': 'Pisang Keju',
+    },
 }
 
 wb = Workbook()
@@ -56,7 +64,7 @@ ws.title = f'{calendar.month_name[args.month]} {args.year}'
 menus = defaultdict(int)
 
 start_time = datetime.datetime(args.year, args.month, args.day, 10, 0, 0)
-end_time   = start_time + relativedelta(months=1, day=1, hour=3)
+end_time   = start_time + relativedelta(months=0, days=1, hour=6)
 
 for backoffice in branch.backoffices:
     df_sales_report = dretail.get_laporan_sales_by_item_detail(
@@ -72,17 +80,34 @@ for backoffice in branch.backoffices:
     for _, row in df_sales_report.iterrows():
         modifier = str(row['Modifier']).rstrip(' 1X')
         item_name = row['Item Name'].rstrip('.')
-        
-        if item_name in modifiers and modifier in modifiers[item_name]:
-                menus[modifiers[item_name][modifier]] += row['Item Sold'] - row['Item Void']
+
+        if item_name in aliases:
+            menus[aliases[item_name]] += row['Item Sold'] - row['Item Void']
+        elif item_name in modifiers and modifier in modifiers[item_name]:
+            menus[modifiers[item_name][modifier]] += row['Item Sold'] - row['Item Void']
         else:
             menus[item_name] += row['Item Sold'] - row['Item Void']
+
+        if row['Category'] == 'Paket Bukber':
+            if 'Ala-ala' in row['Item Name'] or 'Jomblo' in row['Item Name']:
+                menus['Iced Tea'] += (1 * (row['Item Sold'] - row['Item Void']))
+            elif 'Bucin' in row['Item Name']:
+                menus['Iced Tea'] += (2 * (row['Item Sold'] - row['Item Void']))
+            elif 'Gosip' in row['Item Name']:
+                menus['Iced Tea'] += (4 * (row['Item Sold'] - row['Item Void']))
+
+            for bukber_menu_modifier in row['Modifier'].split(','):
+                bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
+                menus[bukber_menu.rstrip('.').lstrip('\n')] += (int(qty.rstrip('X')) * (row['Item Sold'] - row['Item Void']))
 
 menu_print_list_foods = [
     'Espresso (Single Shot)',
     'Hot Americano',
     'Iced Americano',
     'Iced Americano Large',
+    'Liecano',
+    'Dark Berries',
+    'Coffee Milk CRAY',
     'Hot Cappuccino',
     'Iced Cappuccino',
     'Iced Cappuccino Large',
@@ -145,14 +170,18 @@ menu_print_list_foods = [
     'Lychee Tea Large',
     'Thai Tea',
     'Thai Tea Large',
+    'Bali Hai',
+    'Draft Beer',
     'Mineral Water',
 ]
-# 
+
 menu_print_list_beverages = [
     'Kentang Sosis',
     'Pisang',
     'Pisang Keju',
     'Tahu Cabai Garam',
+    'Cireng',
+    'Gorengan',
     'Classic Burger',
     'Rice Bowl Sambal Matah',
     'Rice Bowl Black Pepper',
@@ -163,8 +192,10 @@ menu_print_list_beverages = [
     'Mie Goreng',
     'Mie Kuah',
     'Nasi Goreng',
-    'Waffle',
+    'Brownies',
     'Pancake',
+    'Waffle',
+    'Nasi',
 ]
 
 del menus['TOTAL']

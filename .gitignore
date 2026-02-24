@@ -138,3 +138,6 @@ opbill*
 
 # interval schema
 interval_schema
+
+# weekly reports
+weekly_report*

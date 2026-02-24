@@ -154,11 +154,12 @@ class WhatsApp(object):
         Args:
             username ([type]): [description]
         """
+        # Updated search box selector for latest WhatsApp Web
         search_box = self.wait.until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="side"]/div[1]/div/div[2]/div/div/div',
+                    '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]',
                 )
             )
         )
@@ -190,9 +191,10 @@ class WhatsApp(object):
             username ([type]): [description]
         """
         try:
+            # Updated search box selector for latest WhatsApp Web
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//*[@id="side"]/div[1]/div/label/div/div[2]')
+                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
                 )
             )
             search_box.clear()
@@ -219,9 +221,10 @@ class WhatsApp(object):
             ignore_pinned (boolean): parameter that flags if the pinned chats should or not be ignored - standard value: True (it will ignore pinned chats!)
         """
         try:
+            # Updated search box selector for latest WhatsApp Web
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@id="side"]/div[1]/div/div/div/div')
+                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
                 )
             )
             search_box.click()
@@ -256,9 +259,10 @@ class WhatsApp(object):
             query (string): query value to be located in the chat name
         """
         try:
+            # Updated search box selector for latest WhatsApp Web
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@id="side"]/div[1]/div/div/div/div')
+                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
                 )
             )
             search_box.click()
@@ -408,9 +412,9 @@ class WhatsApp(object):
             # Browse to a "Blank" message state
             self.browser.get(f"https://web.whatsapp.com/send?phone={mobile}&text")
 
-            # This is the XPath of the message textbox
+            # This is the XPath of the message textbox - Updated for latest WhatsApp Web
             inp_xpath = (
-                '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[2]'
+                '//div[@contenteditable="true"][@data-tab="10"]'
             )
             # This is the XPath of the "ok button" if the number was not found
             nr_not_found_xpath = (
@@ -463,8 +467,9 @@ class WhatsApp(object):
             message ([type]): [description]
         """
         try:
+            # Updated XPath for latest WhatsApp Web
             inp_xpath = (
-                '//*[@id="main"]/footer/div/div/span/div/div/div/div[3]/div[1]/p'
+                '//div[@contenteditable="true"][@data-tab="10"]'
             )
             input_box = self.wait.until(
                 EC.presence_of_element_located((By.XPATH, inp_xpath))
@@ -490,23 +495,20 @@ class WhatsApp(object):
         self.send_message(message)
 
     def find_attachment(self):
+        # Updated XPath for attachment button in latest WhatsApp Web
         clipButton = self.wait.until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="main"]/footer//*[@data-icon="attach-menu-plus"]/..',
+                    '//div[@title="Attach"][@role="button"] | //*[@data-icon="plus"] | //*[@data-icon="attach-menu-plus"]/..',
                 )
             )
         )
         clipButton.click()
 
     def add_caption(self, message: str, media_type: str = "image"):
-        xpath_map = {
-            "image": "/html/body/div[1]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]",
-            "video": "/html/body/div[1]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]",
-            "file": "/html/body/div[1]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]",
-        }
-        inp_xpath = xpath_map[media_type]
+        # Updated XPath for caption input in latest WhatsApp Web - using more flexible selector
+        inp_xpath = '//div[@contenteditable="true"][@data-tab="10"]'
         input_box = self.wait.until(
             EC.presence_of_element_located((By.XPATH, inp_xpath))
         )
@@ -524,11 +526,12 @@ class WhatsApp(object):
             )
         )
 
+        # Updated send button selector for latest WhatsApp Web
         sendButton = self.wait.until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[2]/div[2]/div/div',
+                    '//span[@data-icon="send"] | //*[@data-icon="send-light"]',
                 )
             )
         )
@@ -553,12 +556,12 @@ class WhatsApp(object):
         try:
             filename = os.path.realpath(picture)
             self.find_attachment()
-            # To send an Image
+            # To send an Image - Updated selector for latest WhatsApp Web
             imgButton = self.wait.until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div/div/span/div/ul/div/div[2]/li/div/input',
+                        '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]',
                     )
                 )
             )
@@ -605,12 +608,12 @@ class WhatsApp(object):
             if x < 14:
                 # File is less than 14MB
                 self.find_attachment()
-                # To send a Video
+                # To send a Video - Updated selector for latest WhatsApp Web
                 video_button = self.wait.until(
                     EC.presence_of_element_located(
                         (
                             By.XPATH,
-                            '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div/ul/div/div[2]/li/div/input',
+                            '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]',
                         )
                     )
                 )
@@ -638,11 +641,12 @@ class WhatsApp(object):
         try:
             filename = os.path.realpath(filename)
             self.find_attachment()
+            # Updated selector for document input in latest WhatsApp Web
             document_button = self.wait.until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div/ul/div/div[1]/li/div/input',
+                        '//input[@accept="*"]',
                     )
                 )
             )
