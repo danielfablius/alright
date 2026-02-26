@@ -263,16 +263,18 @@ def get_sales_by_category(branch, final=False):
                 continue
 
             if row['Category'] == 'Paket Bukber':
-                if 'Ala-ala' in row['Item Name'] or 'Jomblo' in row['Item Name']:
-                    items['bukber_minuman'] += (1 * (row['Item Sold'] - row['Item Void']))
-                elif 'Bucin' in row['Item Name']:
-                    items['bukber_minuman'] += (2 * (row['Item Sold'] - row['Item Void']))
-                elif 'Gosip' in row['Item Name']:
-                    items['bukber_minuman'] += (4 * (row['Item Sold'] - row['Item Void']))
+                # Count the standard package components (matching open bill logic)
+                packages_sold = row['Item Sold'] - row['Item Void']
                 
-                for bukber_menu_modifier in row['Modifier'].split(','):
-                    bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
-                    items['bukber_makanan'] += int(qty.rstrip('X'))
+                if 'Ala-ala' in row['Item Name'] or 'Jomblo' in row['Item Name']:
+                    items['bukber_makanan'] += (1 * packages_sold)
+                    items['bukber_minuman'] += (1 * packages_sold)
+                elif 'Bucin' in row['Item Name']:
+                    items['bukber_makanan'] += (3 * packages_sold)
+                    items['bukber_minuman'] += (2 * packages_sold)
+                elif 'Gosip' in row['Item Name']:
+                    items['bukber_makanan'] += (6 * packages_sold)
+                    items['bukber_minuman'] += (4 * packages_sold)
 
             items[row['Category']] += row['Item Sold'] - row['Item Void']
 

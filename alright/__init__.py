@@ -154,12 +154,15 @@ class WhatsApp(object):
         Args:
             username ([type]): [description]
         """
-        # Updated search box selector for latest WhatsApp Web
+        # Updated search box selector matching actual WhatsApp Web input element
         search_box = self.wait.until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]',
+                    '//input[@role="textbox"][@data-tab="3"] | '
+                    '//input[@aria-label="Search or start a new chat"] | '
+                    '//input[@placeholder="Search or start a new chat"] | '
+                    '//input[@data-tab="3"]',
                 )
             )
         )
@@ -191,10 +194,14 @@ class WhatsApp(object):
             username ([type]): [description]
         """
         try:
-            # Updated search box selector for latest WhatsApp Web
+            # Updated search box selector matching actual WhatsApp Web input element
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
+                    (By.XPATH, 
+                     '//input[@role="textbox"][@data-tab="3"] | '
+                     '//input[@aria-label="Search or start a new chat"] | '
+                     '//input[@placeholder="Search or start a new chat"] | '
+                     '//input[@data-tab="3"]')
                 )
             )
             search_box.clear()
@@ -221,10 +228,14 @@ class WhatsApp(object):
             ignore_pinned (boolean): parameter that flags if the pinned chats should or not be ignored - standard value: True (it will ignore pinned chats!)
         """
         try:
-            # Updated search box selector for latest WhatsApp Web
+            # Updated search box selector matching actual WhatsApp Web input element
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
+                    (By.XPATH, 
+                     '//input[@role="textbox"][@data-tab="3"] | '
+                     '//input[@aria-label="Search or start a new chat"] | '
+                     '//input[@placeholder="Search or start a new chat"] | '
+                     '//input[@data-tab="3"]')
                 )
             )
             search_box.click()
@@ -259,10 +270,14 @@ class WhatsApp(object):
             query (string): query value to be located in the chat name
         """
         try:
-            # Updated search box selector for latest WhatsApp Web
+            # Updated search box selector matching actual WhatsApp Web input element
             search_box = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, '//div[@contenteditable="true"][@data-tab="3"] | //div[@title="Search input textbox"]')
+                    (By.XPATH, 
+                     '//input[@role="textbox"][@data-tab="3"] | '
+                     '//input[@aria-label="Search or start a new chat"] | '
+                     '//input[@placeholder="Search or start a new chat"] | '
+                     '//input[@data-tab="3"]')
                 )
             )
             search_box.click()
@@ -412,9 +427,14 @@ class WhatsApp(object):
             # Browse to a "Blank" message state
             self.browser.get(f"https://web.whatsapp.com/send?phone={mobile}&text")
 
-            # This is the XPath of the message textbox - Updated for latest WhatsApp Web
+            # Updated message textbox selector matching actual WhatsApp Web DOM structure
             inp_xpath = (
-                '//div[@contenteditable="true"][@data-tab="10"]'
+                '//p[contains(@class, "copyable-text")][@contenteditable="true"] | '
+                '//div[@contenteditable="true"]//p[contains(@class, "copyable-text")] | '
+                '//p[contains(@class, "_aupe")][@contenteditable="true"] | '
+                '//div[@contenteditable="true"][@role="textbox"] | '
+                '//div[@contenteditable="true"][@data-tab="10"] | '
+                '//footer//div[@contenteditable="true"]'
             )
             # This is the XPath of the "ok button" if the number was not found
             nr_not_found_xpath = (
@@ -467,9 +487,14 @@ class WhatsApp(object):
             message ([type]): [description]
         """
         try:
-            # Updated XPath for latest WhatsApp Web
+            # Updated XPath matching actual WhatsApp Web DOM with copyable-text class
             inp_xpath = (
-                '//div[@contenteditable="true"][@data-tab="10"]'
+                '//p[contains(@class, "copyable-text")][@contenteditable="true"] | '
+                '//div[@contenteditable="true"]//p[contains(@class, "copyable-text")] | '
+                '//p[contains(@class, "_aupe")][@contenteditable="true"] | '
+                '//div[@contenteditable="true"][@role="textbox"] | '
+                '//div[@contenteditable="true"][@data-tab="10"] | '
+                '//footer//div[@contenteditable="true"]'
             )
             input_box = self.wait.until(
                 EC.presence_of_element_located((By.XPATH, inp_xpath))
@@ -507,8 +532,14 @@ class WhatsApp(object):
         clipButton.click()
 
     def add_caption(self, message: str, media_type: str = "image"):
-        # Updated XPath for caption input in latest WhatsApp Web - using more flexible selector
-        inp_xpath = '//div[@contenteditable="true"][@data-tab="10"]'
+        # Updated XPath for caption matching actual WhatsApp Web DOM
+        inp_xpath = (
+            '//p[contains(@class, "copyable-text")][@contenteditable="true"] | '
+            '//div[@contenteditable="true"]//p[contains(@class, "copyable-text")] | '
+            '//p[contains(@class, "_aupe")][@contenteditable="true"] | '
+            '//div[@contenteditable="true"][@role="textbox"] | '
+            '//div[@contenteditable="true"][@data-tab="10"]'
+        )
         input_box = self.wait.until(
             EC.presence_of_element_located((By.XPATH, inp_xpath))
         )
