@@ -1,8 +1,12 @@
 import calendar
 import datetime
 import argparse
+import os
 
 from collections import defaultdict
+
+import openpyxl
+import pandas as pd
 from dateutil.relativedelta import relativedelta
 from openpyxl import Workbook
 
@@ -48,9 +52,18 @@ modifiers = {
     },
 }
 
-wb = Workbook()
-ws = wb.active
-ws.title = f'{calendar.month_name[args.month]} {args.year}'
+filename = f'Sales Data {args.year}.xlsx'
+if os.path.exists(filename):
+    wb = openpyxl.load_workbook(filename)
+else:
+    wb = Workbook()
+    wb.save(filename)
+
+title = f'{calendar.month_name[args.month]} {args.year}'
+if title in wb.sheetnames:
+    ws = wb[title]
+else:
+    ws = wb.create_sheet(title)
 
 start_time = datetime.datetime(args.year, args.month, args.day, 10, 0, 0)
 end_time = start_time + relativedelta(days=1, hour=6)
@@ -95,9 +108,10 @@ while current_time < end_time:
                     elif 'Gosip' in row['Item Name']:
                         menus['Iced Tea'] += (4 * (row['Item Sold'] - row['Item Void']))
 
-                    for bukber_menu_modifier in row['Modifier'].split(','):
-                        bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
-                        menus[bukber_menu.rstrip('.')] += (int(qty.rstrip('X')) * (row['Item Sold'] - row['Item Void']))
+                    if not pd.isna(row['Modifier']):
+                        for bukber_menu_modifier in row['Modifier'].split(','):
+                            bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
+                            menus[bukber_menu.rstrip('.')] += (int(qty.rstrip('X')) * (row['Item Sold'] - row['Item Void']))
 
         del menus['TOTAL']
         ws.cell(row=cell_row + 1, column=shifting_start_time.day + 1, value=sum(menus.values()))
@@ -107,4 +121,4 @@ while current_time < end_time:
         cell_row += 1
 
     current_time = shifting_start_time + relativedelta(days=1, hour=10)
-    wb.save(f'Sales Data {ws.title}.xlsx')
+    wb.save(filename)

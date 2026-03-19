@@ -3,6 +3,8 @@ import datetime
 import argparse
 
 from collections import defaultdict
+
+import pandas as pd
 from dateutil.relativedelta import relativedelta
 from openpyxl import Workbook
 
@@ -96,9 +98,10 @@ for backoffice in branch.backoffices:
             elif 'Gosip' in row['Item Name']:
                 menus['Iced Tea'] += (4 * (row['Item Sold'] - row['Item Void']))
 
-            for bukber_menu_modifier in row['Modifier'].split(','):
-                bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
-                menus[bukber_menu.rstrip('.').lstrip('\n')] += (int(qty.rstrip('X')) * (row['Item Sold'] - row['Item Void']))
+            if not pd.isna(row['Modifier']):
+                for bukber_menu_modifier in row['Modifier'].split(','):
+                    bukber_menu, qty = bukber_menu_modifier.rsplit(' ', maxsplit=1)
+                    menus[bukber_menu.rstrip('.').lstrip('\n')] += (int(qty.rstrip('X')) * (row['Item Sold'] - row['Item Void']))
 
 menu_print_list_foods = [
     'Espresso (Single Shot)',

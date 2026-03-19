@@ -168,21 +168,27 @@ class WhatsApp(object):
         )
         search_box.clear()
         search_box.send_keys(username)
-        search_box.send_keys(Keys.ENTER)
+        # Wait for search results to appear
         try:
-            opened_chat = self.browser.find_elements(
-                By.XPATH, '//div[@id="main"]/header/div[2]/div[1]/div[1]/span'
+            # Wait for chat list to update (pane-side is the chat list)
+            self.wait.until(
+                EC.presence_of_element_located((By.ID, "pane-side"))
             )
-            if len(opened_chat):
-                title = opened_chat[0].get_attribute("title")
-                if title.upper() == username.upper():
+            # Find all chat results (each chat row has role="row" and a span with title)
+            chat_xpath = f"//div[@id='pane-side']//div[@role='row']//span[@title]"
+            chat_spans = self.wait.until(
+                EC.presence_of_all_elements_located((By.XPATH, chat_xpath))
+            )
+            for chat_span in chat_spans:
+                chat_title = chat_span.get_attribute("title")
+                if chat_title and chat_title.strip().upper() == username.strip().upper():
+                    chat_span.click()
                     LOGGER.info(f'Successfully fetched chat "{username}"')
-                return True
-            else:
-                LOGGER.info(f'It was not possible to fetch chat "{username}"')
-                return False
-        except NoSuchElementException:
-            LOGGER.exception(f'It was not possible to fetch chat "{username}"')
+                    return True
+            LOGGER.info(f'It was not possible to fetch chat "{username}"')
+            return False
+        except Exception as e:
+            LOGGER.exception(f'Exception while trying to select chat "{username}": {e}')
             return False
 
     def username_exists(self, username):
