@@ -170,19 +170,20 @@ class WhatsApp(object):
         search_box.send_keys(username)
         # Wait for search results to appear
         try:
-            # Wait for chat list to update (pane-side is the chat list)
+            # Wait for chat list container to be visible
             self.wait.until(
                 EC.presence_of_element_located((By.ID, "pane-side"))
             )
-            # Find all chat results (each chat row has role="row" and a span with title)
-            chat_xpath = f"//div[@id='pane-side']//div[@role='row']//span[@title]"
+            # Wait for a matching title node to appear within results
+            chat_xpath = "//div[@id='pane-side']//div[@role='option']//*[name()='span'][@title]"
             chat_spans = self.wait.until(
                 EC.presence_of_all_elements_located((By.XPATH, chat_xpath))
             )
             for chat_span in chat_spans:
                 chat_title = chat_span.get_attribute("title")
                 if chat_title and chat_title.strip().upper() == username.strip().upper():
-                    chat_span.click()
+                    parent_item = chat_span.find_element(By.XPATH, "ancestor::div[@role='option']")
+                    parent_item.click()
                     LOGGER.info(f'Successfully fetched chat "{username}"')
                     return True
             LOGGER.info(f'It was not possible to fetch chat "{username}"')
