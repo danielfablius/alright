@@ -168,24 +168,33 @@ class WhatsApp(object):
         )
         search_box.clear()
         search_box.send_keys(username)
+        search_box.send_keys(Keys.ENTER) # Force an update
         # Wait for search results to appear
         try:
+            time.sleep(3)
+            print("DEBUG: WAITING")
             # Wait for chat list container to be visible
             self.wait.until(
                 EC.presence_of_element_located((By.ID, "pane-side"))
             )
+            print("DEBUG: WAITING2")
             # Wait for a matching title node to appear within results
-            chat_xpath = "//div[@id='pane-side']//div[@role='option']//*[name()='span'][@title]"
+            chat_xpath = f"//div[@id='pane-side']//span[@title='{username}']"
             chat_spans = self.wait.until(
                 EC.presence_of_all_elements_located((By.XPATH, chat_xpath))
             )
+            print("DEBUG: WAITING3")
             for chat_span in chat_spans:
+                print("DEBUG: WAITING4")
                 chat_title = chat_span.get_attribute("title")
                 if chat_title and chat_title.strip().upper() == username.strip().upper():
-                    parent_item = chat_span.find_element(By.XPATH, "ancestor::div[@role='option']")
+                    print("DEBUG: WAITING5")
+                    #parent_item = chat_span.find_element(By.XPATH, "ancestor::div[@role='option']")
+                    parent_item = chat_span.find_element(By.XPATH, "./ancestor::div[@role='listitem'] | ./ancestor::div[@role='row'] | ./ancestor::div[contains(@class, 'lhvu77xa')]")
                     parent_item.click()
                     LOGGER.info(f'Successfully fetched chat "{username}"')
                     return True
+            print("DEBUG: WAITING6")    
             LOGGER.info(f'It was not possible to fetch chat "{username}"')
             return False
         except Exception as e:
@@ -431,6 +440,7 @@ class WhatsApp(object):
         #   3 = Error or Failure to Send Message
         #   4 = Not a WhatsApp Number
         try:
+            print("DEBUG: SENDING MESSAGE1")
             # Browse to a "Blank" message state
             self.browser.get(f"https://web.whatsapp.com/send?phone={mobile}&text")
 
@@ -494,14 +504,11 @@ class WhatsApp(object):
             message ([type]): [description]
         """
         try:
+            print("DEBUG: SENDING MESSAGE")
+            
             # Updated XPath matching actual WhatsApp Web DOM with copyable-text class
             inp_xpath = (
-                '//p[contains(@class, "copyable-text")][@contenteditable="true"] | '
-                '//div[@contenteditable="true"]//p[contains(@class, "copyable-text")] | '
-                '//p[contains(@class, "_aupe")][@contenteditable="true"] | '
-                '//div[@contenteditable="true"][@role="textbox"] | '
-                '//div[@contenteditable="true"][@data-tab="10"] | '
-                '//footer//div[@contenteditable="true"]'
+                '//div[@id="main"]//footer//div[@contenteditable="true"][@role="textbox"]'
             )
             input_box = self.wait.until(
                 EC.presence_of_element_located((By.XPATH, inp_xpath))
@@ -521,8 +528,10 @@ class WhatsApp(object):
 
     def send_direct_message(self, mobile: str, message: str, saved: bool = True):
         if saved:
+            print("DEBUG: FIND BY USERNAME")
             self.find_by_username(mobile)
         else:
+            print("DEBUG: FIND USER")
             self.find_user(mobile)
         self.send_message(message)
 

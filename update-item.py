@@ -248,6 +248,7 @@ def get_sales_by_category(branch, final=False):
     ob_items = defaultdict(int)
 
     for backoffice in branch.backoffices:
+        print("start")
         df_laporan_sales = dretail.get_laporan_sales_by_item_detail(
             backoffice.branch_id,
             backoffice.company_id,
